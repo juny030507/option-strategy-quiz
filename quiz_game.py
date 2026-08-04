@@ -9,7 +9,7 @@ class QuizGame:
         """초기 퀴즈 목록과 점수를 설정한다."""
         self.quizzes = list(quizzes) if quizzes is not None else []
 
-        if not all(instance(quiz, Quiz) for quiz in self.quizzes):
+        if not all(isinstance(quiz, Quiz) for quiz in self.quizzes):
             raise TypeError("퀴즈 목록에는 Quiz 객체만 넣을 수 있습니다.")
 
         self.correct_count = 0
