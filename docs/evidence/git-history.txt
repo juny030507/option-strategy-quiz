@@ -1,0 +1,27 @@
+Git·PR 이력 증거
+================
+
+확인 명령:
+git log --oneline --graph --decorate --all
+
+병합된 PR과 merge commit:
+- PR #1  https://github.com/juny030507/option-strategy-quiz/pull/1  f1e2dbc
+- PR #2  https://github.com/juny030507/option-strategy-quiz/pull/2  4c3b24e
+- PR #3  https://github.com/juny030507/option-strategy-quiz/pull/3  1c78a0b
+- PR #4  https://github.com/juny030507/option-strategy-quiz/pull/4  df11df0
+- PR #5  https://github.com/juny030507/option-strategy-quiz/pull/5  12425f9
+- PR #6  https://github.com/juny030507/option-strategy-quiz/pull/6  15b175d
+- PR #7  https://github.com/juny030507/option-strategy-quiz/pull/7  7554670
+- PR #8  https://github.com/juny030507/option-strategy-quiz/pull/8  4cee799
+- PR #9  https://github.com/juny030507/option-strategy-quiz/pull/9  4cd784a
+- PR #10 https://github.com/juny030507/option-strategy-quiz/pull/10 18457dc
+- PR #11 https://github.com/juny030507/option-strategy-quiz/pull/11 43fe142
+
+최종 문서 브랜치:
+- docs/final-readme
+- ec56c8c Docs: 프로젝트 사용법과 구조 문서화
+- Docs: 전체 개발 과정과 최종 제출 자료 완성
+- PR #12 https://github.com/juny030507/option-strategy-quiz/pull/12
+
+PR #6 이후에는 Draft에서 변경 파일과 검증 결과를 확인한 뒤
+Ready로 전환해 merge commit 방식으로 병합하는 흐름을 사용했다.
