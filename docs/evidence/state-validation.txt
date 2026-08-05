@@ -1,0 +1,23 @@
+state.json 검증 증거
+=====================
+
+검증 명령:
+python3 -m json.tool state.json
+
+구조 검증 결과:
+- JSON 문법: 정상
+- 최상위 키: quizzes, score
+- 퀴즈: 고유한 기본 문제 10개
+- 각 퀴즈의 선택지: 4개
+- correct_count: 0
+- attempt_count: 0
+- UTF-8 한글: 보존
+
+SHA-256:
+938a7ef9b9ca049fc53b5545c404a8b80c680dcc95e8528a86de45d444878e77
+
+추가 확인:
+- 회귀 테스트 전후 SHA-256 동일
+- 새 clone의 최소 종료 흐름 후에도 Git 작업 트리 깨끗함
+- 제출 상태는 create_default_game()과 save_state()로 재생성한
+  기본 10문제·0/0점 상태

@@ -1,0 +1,32 @@
+GitHub Actions·브랜치 보호 증거
+================================
+
+워크플로:
+- 파일: .github/workflows/tests.yml
+- 트리거: main push, main 대상 pull request
+- 러너: ubuntu-latest
+- Python: 3.10
+- actions/checkout@v6
+- actions/setup-python@v5
+- 권한: contents: read
+- 명령: python -m unittest discover -s tests -v
+
+실제 실행:
+- PR #11: https://github.com/juny030507/option-strategy-quiz/actions/runs/30992519124
+  결과: success, Python 3.10.20, 58 tests OK
+- main push: https://github.com/juny030507/option-strategy-quiz/actions/runs/30992597212
+  결과: success, Python 3.10.20, 58 tests OK
+- PR #12: https://github.com/juny030507/option-strategy-quiz/actions/runs/30996368348
+  결과: success, 58 tests OK
+- 상태 검사 이름: Python 3.10 unit tests
+
+main 브랜치 보호:
+- pull request 필수
+- 필수 승인 수: 0
+- Python 3.10 unit tests 필수
+- 최신 main 기준 필수(strict): 활성화
+- 대화 해결: 필수
+- force push: 금지
+- 브랜치 삭제: 금지
+- 관리자 강제 적용: 비활성화
+- merge commit: 허용

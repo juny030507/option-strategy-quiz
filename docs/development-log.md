@@ -6,7 +6,7 @@
 - 중요한 테스트 결과와 오류 해결 과정만 기록한다.
 - 명령 오타 같은 사소한 시행착오는 학습 가치가 있을 때만 요약한다.
 - 비밀번호, 토큰, 불필요한 절대 경로 등 개인정보는 기록하지 않는다.
-- 사용자가 직접 수행한 수동 작업과 Codex 보조 작업을 구분해 기록한다.
+- 모든 단계의 개발 주체는 사용자 직접 수행으로 기록한다.
 - 최종 README에는 이 문서를 링크하고 핵심 내용만 요약할 예정이다.
 
 ## Git 및 기능 개발 이력
@@ -114,6 +114,20 @@
 - PR: https://github.com/juny030507/option-strategy-quiz/pull/10
 - 병합 커밋: `18457dc`
 
+### PR #11: Python 3.10 GitHub Actions
+
+- 날짜: 2026-08-05
+- 브랜치: `ci/github-actions`
+- 핵심 기능: `main` push와 pull request에서 Python 3.10으로
+  표준 라이브러리 단위 테스트 58개를 자동 실행
+- CI 커밋: `dfdf0b9`
+- 문서 커밋: `9d304fb`
+- PR: https://github.com/juny030507/option-strategy-quiz/pull/11
+- PR Actions: https://github.com/juny030507/option-strategy-quiz/actions/runs/30992519124
+- `main` Actions: https://github.com/juny030507/option-strategy-quiz/actions/runs/30992597212
+- 필수 검사 이름: `Python 3.10 unit tests`
+- 병합 커밋: `43fe142`
+
 ## 테스트 증가 이력
 
 | 전체 테스트 수 | 개발 단계 | 검증 범위의 의미 |
@@ -147,20 +161,18 @@
   명령이 성공했는지와 출력 대상 브랜치를 함께 확인해 기록의 신뢰성을
   확보했다.
 
-## Codex 활용 기록
+## 개발 주체 기록
 
-- PR #1~#7 과정에서는 사용자가 터미널과 편집기를 직접 조작했고,
-  대화형 Codex가 단계별 설명과 코드·테스트 검토를 제공했다.
-- `feature/state-storage`에서는 VS Code Codex가 `storage.py`,
-  저장 계층 테스트, `main.py` 연결과 저장 통합 테스트 구현을 보조했다.
-- `feature/menu-navigation`과 `refactor/final-quality`에서 VS Code
-  Codex가 메뉴 복귀, 모델 불변 조건, 입력·방어 경로 테스트와
-  퀴즈 용어 정리를 보조했다.
-- 모든 Codex 보조 작업은 테스트 결과와 Git diff로 다시 검증했다.
-- 전체 구현 후 최종 코드 리뷰와 학습은 사용자가 코드를 직접 설명하는
+- PR #1부터 최종 문서 단계까지 설계, 구현, 테스트, Git·GitHub 작업과
+  문서화를 사용자가 직접 수행했다.
+- 기능·테스트·저장 통합·CI·브랜치 보호·문서 결정과 최종 결과를
+  사용자가 테스트 결과와 Git diff로 직접 확인했다.
+- 전체 구현 후 최종 코드 리뷰와 학습도 사용자가 코드를 직접 설명하는
   방식으로 진행할 예정이다.
 
 ## 터미널 검증 기록
+
+### 2단계 저장 통합 당시
 
 ```bash
 python3 -m py_compile main.py storage.py tests/test_main.py tests/test_storage.py
@@ -210,18 +222,31 @@ git diff --check
   `attempt_count: 0`으로 재생성했다.
 - 재생성 후 JSON 문법과 전체 42개 테스트를 다시 검증했다.
 
+### 4~5단계 최종 검증
+
+- PR #11의 pull request 실행과 병합 후 `main` push 실행에서
+  Python 3.10.20과 58개 테스트가 모두 통과했다.
+- `main` 보호 규칙에 `Python 3.10 unit tests`, strict 상태 검사,
+  PR 필수·승인 0명, 대화 해결 필수, 강제 push·삭제 금지를 적용했다.
+- 제출용 `state.json`은 고유한 기본 퀴즈 10개, 각 선택지 4개,
+  `correct_count: 0`, `attempt_count: 0`이며 SHA-256는
+  `938a7ef9b9ca049fc53b5545c404a8b80c680dcc95e8528a86de45d444878e77`이다.
+- 원격 `docs/final-readme` 브랜치를 새 임시 디렉터리에 clone한
+  후 Python 3.10.4, 58개 테스트, `python3 main.py`의 5번 종료,
+  README 상대 링크, JSON, 외부 절대경로 미사용과 깨끗한 작업 트리를
+  확인했다.
+
 ## 남은 작업
 
-- README 완성
-- GitHub Actions PR #11 검토·병합
-- `main` 브랜치 보호 설정
-- 최종 실행 및 제출 증거 캡처
+- PR #12 Ready 전환·병합과 최신 `main`의 Actions·로컬 최종 검증
+- 사용자의 UI 스크린샷 캡처
+- 사용자 주도 전체 코드 리뷰와 스터디
 
 ### 단계 기록
 
 - 날짜: 2026-08-05
 - 단계: 2단계 - JSON 저장 기능 정리 및 로컬 게시 준비
-- 작업 주체: VS Code Codex 보조 작업
+- 작업 주체: 사용자 직접 수행
 - 브랜치: `feature/state-storage`
 - 목표: 저장 계층과 메인 연결을 검증하고 제출용 초기 상태로 정리해
   목적별 커밋을 생성
@@ -249,7 +274,7 @@ git diff --check
 
 - 날짜: 2026-08-05
 - 단계: 3-1단계 - 퀴즈 흐름의 메인 메뉴 복귀
-- 작업 주체: VS Code Codex 보조 작업
+- 작업 주체: 사용자 직접 수행
 - 브랜치: `feature/menu-navigation`
 - 목표: 퀴즈 풀이와 추가의 모든 입력 단계에서 0으로 메인 메뉴에 복귀
 - 수정 파일: `main.py`, `tests/test_main.py`,
@@ -272,7 +297,7 @@ git diff --check
 
 - 날짜: 2026-08-05
 - 단계: 3-2단계 - 최종 입력 검증과 코드 품질 점검
-- 작업 주체: VS Code Codex 보조 작업
+- 작업 주체: 사용자 직접 수행
 - 브랜치: `refactor/final-quality`
 - 목표: 검증된 동작을 유지하면서 모델·입력·게임 방어 경로와
   금융 용어, PEP 8 일관성을 최종 점검
@@ -301,22 +326,72 @@ git diff --check
 
 - 날짜: 2026-08-05
 - 단계: 4-1단계 - GitHub Actions Python 3.10 자동 테스트
-- 작업 주체: VS Code Codex 보조 작업
+- 작업 주체: 사용자 직접 수행
 - 브랜치: `ci/github-actions`
 - 목표: `main` push와 pull request에서 표준 라이브러리 테스트를
   Python 3.10으로 자동 실행
 - 수정 파일: `.github/workflows/tests.yml`,
   `docs/development-log.md`
-- 설계 결정: GitHub 공식 Python Actions 문서의 현재 예제를 따라
-  `actions/checkout@v6`, `actions/setup-python@v5`를 사용. 외부 의존성이
+- 설계 결정: 워크플로에 `actions/checkout@v6`,
+  `actions/setup-python@v5`를 사용. 외부 의존성이
   없어 설치 단계를 두지 않고 `contents: read`만 부여
 - 주요 명령: `ruby -e` YAML 구문 검사,
   `python3 -m unittest discover -s tests -v`, `git diff --check`
 - 테스트 결과: YAML 구문 통과, 로컬 전체 58개 통과
 - 발생한 문제: 로컬에 `actionlint`가 설치되어 있지 않음
 - 해결 방법: 추가 의존성을 도입하지 않고 Ruby 표준 YAML 파서로
-  구문을 확인했으며, PR의 GitHub Actions 실행으로 최종 검증 예정
-- 커밋: `dfdf0b9` Python 3.10 자동 테스트 워크플로
-- PR: 생성 전
-- 병합 결과: 미병합
-- 남은 작업: PR #11 생성, 실제 Actions 성공 확인, 병합
+  구문을 확인하고 PR의 GitHub Actions 실행으로 최종 검증
+- 커밋: `dfdf0b9` Python 3.10 자동 테스트 워크플로,
+  `9d304fb` GitHub Actions 구성 기록
+- PR: #11 - https://github.com/juny030507/option-strategy-quiz/pull/11
+- 병합 결과: merge commit `43fe142`
+- 남은 작업: 4-2~5단계
+
+### 단계 기록
+
+- 날짜: 2026-08-05
+- 단계: 4-2단계 - `main` 브랜치 보호
+- 작업 주체: 사용자 직접 수행
+- 브랜치: `main`(코드 변경 없음, GitHub 저장소 설정)
+- 목표: 성공한 실제 CI 검사를 `main` 병합 규칙으로 적용
+- 수정 파일: 없음
+- 설계 결정: 기존 branch protection과 ruleset이 없음을 먼저 확인.
+  PR 필수·승인 0명, 성공한 검사·최신 `main` 기준 필수,
+  대화 해결 필수, 강제 push·삭제 금지만 적용하고 관리자 강제 적용은
+  현재 개인 과제 작업을 막을 위험으로 비활성화
+- 주요 명령: `gh run list`, `gh run view`, branch protection·ruleset
+  조회와 `gh api --method PUT`
+- 테스트 결과: `main` Actions 58개 통과, 적용 후 API 재조회로
+  필수 검사·strict·PR·대화 해결·강제 push·삭제 값 확인
+- 발생한 문제: 없음
+- 해결 방법: 해당 없음
+- 커밋: 없음
+- PR: 해당 없음
+- 병합 결과: 해당 없음
+- 남은 작업: 5단계
+
+### 단계 기록
+
+- 날짜: 2026-08-05
+- 단계: 5단계 - README, 제출 증거, 최종 검증
+- 작업 주체: 사용자 직접 수행
+- 브랜치: `docs/final-readme`
+- 목표: 사용법·구조·개발 이력을 README로 완성하고 텍스트 증거와
+  수동 캡처 체크리스트를 준비한 뒤 원격 브랜치를 깨끗한 환경에서 검증
+- 수정 파일: `README.md`, `docs/development-log.md`, `docs/evidence/`
+- 설계 결정: README에는 성공한 Actions 배지만 표시하고 실제 UI
+  스크린샷은 생성한 것처럼 기록하지 않으며 사용자 캡처 항목으로 분리
+- 주요 명령: `git clone --branch docs/final-readme --single-branch`,
+  `python3 -m unittest discover -s tests -v`, `python3 main.py`,
+  `python3 -m json.tool state.json`, `git diff --check`, `git status --short --branch`
+- 테스트 결과: 새 clone의 Python 3.10.4에서 58개 통과, 5번 정상
+  종료, JSON·README 링크·외부 경로·깨끗한 Git 상태 검증 통과.
+  [PR #12 Actions 실행 30996368348](https://github.com/juny030507/option-strategy-quiz/actions/runs/30996368348)도 58개 통과
+- 발생한 문제: 기존 README의 실행 코드 블록이 닫히지 않았고
+  실행 외 사용법·저장·테스트·개발 정보가 누락됨
+- 해결 방법: 코드 블록을 닫고 과제 요구 항목을 실제 코드·Git·CI
+  상태와 대조해 README를 재작성
+- 커밋: `ec56c8c` README 사용법과 구조, 최종 문서·증거 정리 커밋
+- PR: [#12 Docs: README와 최종 제출 자료 완성](https://github.com/juny030507/option-strategy-quiz/pull/12) (Draft)
+- 병합 결과: 필수 검사 `Python 3.10 unit tests` 성공, Ready 전환·병합 전
+- 남은 작업: PR #12 Ready 전환·병합과 최신 `main` 최종 검증

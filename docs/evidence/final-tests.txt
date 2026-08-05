@@ -1,0 +1,27 @@
+최종 테스트 증거
+====================
+
+검증일: 2026-08-05
+검증 환경: Python 3.10.4
+
+명령:
+python3 -m unittest discover -s tests -v
+
+결과:
+Ran 58 tests
+OK
+
+테스트 구성:
+- default quizzes: 5개
+- main: 25개
+- Quiz: 7개
+- QuizGame: 11개
+- storage: 10개
+
+추가 검증:
+- python3 -m json.tool state.json: 통과
+- git diff --check: 통과
+- 원격 docs/final-readme 브랜치를 새 임시 디렉터리에 clone한 후
+  동일한 58개 테스트 통과
+- 새 clone에서 python3 main.py 실행 후 5번 정상 종료 통과
+- 새 clone의 Git 작업 트리 깨끗함 확인
