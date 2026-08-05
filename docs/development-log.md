@@ -101,6 +101,19 @@
 - PR: https://github.com/juny030507/option-strategy-quiz/pull/9
 - 병합 커밋: `4cd784a`
 
+### PR #10: 최종 입력 검증과 코드 품질
+
+- 날짜: 2026-08-05
+- 브랜치: `refactor/final-quality`
+- 핵심 기능: `Quiz`·`QuizGame` 불변 조건과 방어 경로 강화,
+  숫자 입력 재시도·EOF 테스트, 커버드 콜 용어와 PEP 8 정리
+- 기능 커밋: `8713c95`
+- 테스트 커밋: `007a00e`
+- 데이터 커밋: `bdb4f42`
+- 문서 커밋: `b31924d`
+- PR: https://github.com/juny030507/option-strategy-quiz/pull/10
+- 병합 커밋: `18457dc`
+
 ## 테스트 증가 이력
 
 | 전체 테스트 수 | 개발 단계 | 검증 범위의 의미 |
@@ -200,9 +213,8 @@ git diff --check
 ## 남은 작업
 
 - README 완성
-- GitHub Actions 구성
+- GitHub Actions PR #11 검토·병합
 - `main` 브랜치 보호 설정
-- 최종 코드 품질 PR #10 검토·병합
 - 최종 실행 및 제출 증거 캡처
 
 ### 단계 기록
@@ -280,7 +292,31 @@ git diff --check
 - 발생한 문제: 없음
 - 해결 방법: 해당 없음
 - 커밋: `8713c95` 모델·용어 정리, `007a00e` 방어 경로 테스트,
-  `bdb4f42` 최신 기본 상태
+  `bdb4f42` 최신 기본 상태, `b31924d` 개발 로그
+- PR: #10 - https://github.com/juny030507/option-strategy-quiz/pull/10
+- 병합 결과: merge commit `18457dc`
+- 남은 작업: 4~5단계
+
+### 단계 기록
+
+- 날짜: 2026-08-05
+- 단계: 4-1단계 - GitHub Actions Python 3.10 자동 테스트
+- 작업 주체: VS Code Codex 보조 작업
+- 브랜치: `ci/github-actions`
+- 목표: `main` push와 pull request에서 표준 라이브러리 테스트를
+  Python 3.10으로 자동 실행
+- 수정 파일: `.github/workflows/tests.yml`,
+  `docs/development-log.md`
+- 설계 결정: GitHub 공식 Python Actions 문서의 현재 예제를 따라
+  `actions/checkout@v6`, `actions/setup-python@v5`를 사용. 외부 의존성이
+  없어 설치 단계를 두지 않고 `contents: read`만 부여
+- 주요 명령: `ruby -e` YAML 구문 검사,
+  `python3 -m unittest discover -s tests -v`, `git diff --check`
+- 테스트 결과: YAML 구문 통과, 로컬 전체 58개 통과
+- 발생한 문제: 로컬에 `actionlint`가 설치되어 있지 않음
+- 해결 방법: 추가 의존성을 도입하지 않고 Ruby 표준 YAML 파서로
+  구문을 확인했으며, PR의 GitHub Actions 실행으로 최종 검증 예정
+- 커밋: `dfdf0b9` Python 3.10 자동 테스트 워크플로
 - PR: 생성 전
 - 병합 결과: 미병합
-- 남은 작업: PR #10 생성·검토·병합 후 4~5단계
+- 남은 작업: PR #11 생성, 실제 Actions 성공 확인, 병합
