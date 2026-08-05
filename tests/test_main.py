@@ -272,6 +272,69 @@ class TestMainQuizFlow(unittest.TestCase):
             output.getvalue(),
         )
 
+    def test_play_quizzes_returns_to_menu_on_zero(self) -> None:
+        """퀴즈 풀이에서 0을 입력하면 점수 변화 없이 돌아가야 한다."""
+        output = io.StringIO()
+        quiz_count = len(self.game.quizzes)
+
+        with patch("builtins.input", return_value="0"):
+            with redirect_stdout(output):
+                play_quizzes(self.game)
+
+        self.assertEqual(len(self.game.quizzes), quiz_count)
+        self.assertEqual(self.game.attempt_count, 0)
+        self.assertIn("메인 메뉴로 돌아갑니다.", output.getvalue())
+
+    def test_add_new_quiz_returns_to_menu_on_zero_question(self) -> None:
+        """문제 입력에서 0을 입력하면 퀴즈 추가를 취소해야 한다."""
+        output = io.StringIO()
+        quiz_count = len(self.game.quizzes)
+
+        with patch("builtins.input", return_value="0"):
+            with redirect_stdout(output):
+                add_new_quiz(self.game)
+
+        self.assertEqual(len(self.game.quizzes), quiz_count)
+        self.assertEqual(self.game.attempt_count, 0)
+        self.assertIn("메뉴로 돌아갑니다.", output.getvalue())
+
+    def test_add_new_quiz_returns_to_menu_on_zero_choice(self) -> None:
+        """선택지 입력에서 0을 입력하면 퀴즈 추가를 취소해야 한다."""
+        output = io.StringIO()
+        quiz_count = len(self.game.quizzes)
+
+        with patch(
+            "builtins.input",
+            side_effect=["새 문제", "0"],
+        ):
+            with redirect_stdout(output):
+                add_new_quiz(self.game)
+
+        self.assertEqual(len(self.game.quizzes), quiz_count)
+        self.assertEqual(self.game.attempt_count, 0)
+        self.assertIn("메뉴로 돌아갑니다.", output.getvalue())
+
+    def test_add_new_quiz_returns_to_menu_on_zero_answer(self) -> None:
+        """정답 입력에서 0을 입력하면 퀴즈 추가를 취소해야 한다."""
+        output = io.StringIO()
+        quiz_count = len(self.game.quizzes)
+        inputs = [
+            "새 문제",
+            "선택지1",
+            "선택지2",
+            "선택지3",
+            "선택지4",
+            "0",
+        ]
+
+        with patch("builtins.input", side_effect=inputs):
+            with redirect_stdout(output):
+                add_new_quiz(self.game)
+
+        self.assertEqual(len(self.game.quizzes), quiz_count)
+        self.assertEqual(self.game.attempt_count, 0)
+        self.assertIn("메뉴로 돌아갑니다.", output.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()
