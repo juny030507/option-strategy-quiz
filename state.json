@@ -41,7 +41,7 @@
       "answer": 3
     },
     {
-      "question": "보증된 콜(Covered Call)의 구성으로 옳은 것은?",
+      "question": "커버드 콜(Covered Call)의 구성으로 옳은 것은?",
       "choices": [
         "기초자산 없이 콜옵션 매도",
         "기초자산 보유 + 풋옵션 매수",
