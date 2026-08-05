@@ -44,6 +44,40 @@ class TestQuizGame(unittest.TestCase):
 
         self.assertIn(new_quiz, self.game.quizzes)
 
+    def test_initial_quizzes_reject_non_quiz_item(self) -> None:
+        """초기 목록에 Quiz가 아닌 객체가 있으면 거부한다."""
+        with self.assertRaises(TypeError):
+            QuizGame([object()])
+
+    def test_add_quiz_rejects_non_quiz_item(self) -> None:
+        """Quiz가 아닌 객체를 게임에 추가할 수 없어야 한다."""
+        with self.assertRaises(TypeError):
+            self.game.add_quiz(object())
+
+    def test_submit_answer_rejects_unregistered_quiz(self) -> None:
+        """게임에 등록되지 않은 퀴즈는 채점하지 않는다."""
+        unregistered_quiz = Quiz(
+            "스트래들 매수의 구성은?",
+            ["콜 매수 + 풋 매수", "콜 매도", "풋 매도", "기초자산 매수"],
+            1,
+        )
+
+        with self.assertRaises(ValueError):
+            self.game.submit_answer(unregistered_quiz, 1)
+
+        self.assertEqual(self.game.correct_count, 0)
+        self.assertEqual(self.game.attempt_count, 0)
+
+    def test_submit_answer_rejects_invalid_answer(self) -> None:
+        """범위 밖이거나 정수가 아닌 답안은 점수에 반영하지 않는다."""
+        for invalid_answer in (0, 5, True, "1"):
+            with self.subTest(answer=invalid_answer):
+                with self.assertRaises(ValueError):
+                    self.game.submit_answer(self.quiz, invalid_answer)
+
+        self.assertEqual(self.game.correct_count, 0)
+        self.assertEqual(self.game.attempt_count, 0)
+
     def test_correct_answer_updates_score(self) -> None:
         """정답을 제출하면 풀이 수와 정답 수가 증가해야 한다."""
         result = self.game.submit_answer(self.quiz, 1)

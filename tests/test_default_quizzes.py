@@ -5,6 +5,7 @@ import unittest
 from default_quizzes import create_default_quizzes
 from quiz import Quiz
 
+
 class TestDefaultQuizzes(unittest.TestCase):
     """기본 퀴즈 목록이 과제 지시사항을 만족하는지 테스트한다."""
 
@@ -38,6 +39,17 @@ class TestDefaultQuizzes(unittest.TestCase):
                 )
                 self.assertIn(quiz.answer, range(1, 5))
 
+    def test_covered_call_uses_consistent_term(self) -> None:
+        """커버드 콜 문제가 정확하고 일관된 용어를 사용한다."""
+        questions = [quiz.question for quiz in self.quizzes]
+
+        self.assertTrue(
+            any("커버드 콜(Covered Call)" in question for question in questions)
+        )
+        self.assertFalse(
+            any("보증된 콜(Covered Call)" in question for question in questions)
+        )
+
+
 if __name__ == "__main__":
     unittest.main()
-
