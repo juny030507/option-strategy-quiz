@@ -1,8 +1,8 @@
 """옵션 투자기법 퀴즈 게임의 실행 파일."""
 
-from default_quizzes import create_default_quizzes
 from quiz import Quiz
 from quiz_game import QuizGame
+from storage import load_state, save_state
 
 
 def show_menu() -> None:
@@ -16,6 +16,7 @@ def show_menu() -> None:
     print("4. 점수 확인")
     print("5. 종료")
     print("=" * 40)
+
 
 def read_number(
     prompt: str,
@@ -41,6 +42,7 @@ def read_number(
             return number
         print(f"{minimum}~{maximum} 사이의 숫자를 입력해주세요.")
 
+
 def read_text(prompt: str) -> str | None:
     """비어 있지 않은 문자열을 입력받는다."""
     while True:
@@ -54,6 +56,7 @@ def read_text(prompt: str) -> str | None:
             return value
 
         print("빈 입력은 사용할 수 없습니다.")
+
 
 def add_new_quiz(game: QuizGame) -> None:
     """사용자에게 문제 정보를 입력받아 퀴즈를 추가한다."""
@@ -89,6 +92,7 @@ def add_new_quiz(game: QuizGame) -> None:
 
     print(f"퀴즈가 추가되었습니다. 현재 총 {len(game.quizzes)}개입니다.")
 
+
 def show_quiz_list(game: QuizGame) -> None:
     """등록된 퀴즈의 문제와 선택지를 출력한다."""
     if not game.quizzes:
@@ -105,6 +109,7 @@ def show_quiz_list(game: QuizGame) -> None:
         for choice_number, choice in enumerate(quiz.choices, start=1):
             print(f"   {choice_number}) {choice}")
 
+
 def show_score(game: QuizGame) -> None:
     """현재까지 누적된 점수와 정답률을 출력한다."""
     print("\n" + "=" * 40)
@@ -114,6 +119,7 @@ def show_score(game: QuizGame) -> None:
     print(f"맞힌 문제: {game.correct_count}개")
     print(f"정답률: {game.calculate_accuracy():.1f}%")
     print("=" * 40)
+
 
 def play_quizzes(game: QuizGame) -> None:
     """등록된 퀴즈를 차례대로 풀고 채점한다."""
@@ -149,24 +155,28 @@ def play_quizzes(game: QuizGame) -> None:
 
 def main() -> None:
     """사용자가 종료를 선택할 때까지 메뉴를 반복한다."""
-    game = QuizGame(create_default_quizzes())
+    game = load_state()
 
     while True:
         show_menu()
         choice = read_number("메뉴 선택: ", 1, 5)
         if choice is None:
+            save_state(game)
             print("퀴즈 게임을 안전하게 종료합니다.")
             break
 
         if choice == 1:
             play_quizzes(game)
+            save_state(game)
         elif choice == 2:
             add_new_quiz(game)
+            save_state(game)
         elif choice == 3:
             show_quiz_list(game)
         elif choice == 4:
             show_score(game)
         elif choice == 5:
+            save_state(game)
             print("퀴즈 게임을 종료합니다.")
             break
 
