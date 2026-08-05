@@ -89,6 +89,18 @@
 - PR: https://github.com/juny030507/option-strategy-quiz/pull/8
 - 병합 커밋: `4cee799`
 
+### PR #9: 퀴즈 흐름의 메인 메뉴 복귀
+
+- 날짜: 2026-08-05
+- 브랜치: `feature/menu-navigation`
+- 핵심 기능: 퀴즈 풀이와 추가의 모든 입력 단계에서 0으로
+  점수나 미완성 퀴즈를 변경하지 않고 메인 메뉴로 복귀
+- 기능 커밋: `895011f`
+- 테스트 커밋: `04eb721`
+- 문서 커밋: `3832cd5`
+- PR: https://github.com/juny030507/option-strategy-quiz/pull/9
+- 병합 커밋: `4cd784a`
+
 ## 테스트 증가 이력
 
 | 전체 테스트 수 | 개발 단계 | 검증 범위의 의미 |
@@ -101,6 +113,7 @@
 | 38개 | JSON 저장 계층 | 직렬화, 왕복 저장, 손상·누락·I/O 오류 복구 검증 포함 |
 | 42개 | main.py 저장 통합 | 시작 불러오기와 풀이·추가·종료 시 저장 호출 검증 포함 |
 | 46개 | 메뉴 복귀 | 풀이와 추가의 각 입력 단계에서 0으로 취소하는 흐름 포함 |
+| 58개 | 최종 코드 품질 | 모델 불변 조건, QuizGame 방어 경로, 숫자 입력 재시도·EOF와 금융 용어 검증 포함 |
 
 ## 주요 문제와 해결
 
@@ -127,6 +140,9 @@
   대화형 Codex가 단계별 설명과 코드·테스트 검토를 제공했다.
 - `feature/state-storage`에서는 VS Code Codex가 `storage.py`,
   저장 계층 테스트, `main.py` 연결과 저장 통합 테스트 구현을 보조했다.
+- `feature/menu-navigation`과 `refactor/final-quality`에서 VS Code
+  Codex가 메뉴 복귀, 모델 불변 조건, 입력·방어 경로 테스트와
+  퀴즈 용어 정리를 보조했다.
 - 모든 Codex 보조 작업은 테스트 결과와 Git diff로 다시 검증했다.
 - 전체 구현 후 최종 코드 리뷰와 학습은 사용자가 코드를 직접 설명하는
   방식으로 진행할 예정이다.
@@ -183,12 +199,10 @@ git diff --check
 
 ## 남은 작업
 
-- `state.json`의 최종 제출 방식 결정
-- 메뉴 복귀 기능 PR #9
 - README 완성
 - GitHub Actions 구성
 - `main` 브랜치 보호 설정
-- 전체 코드 리뷰와 리팩터링
+- 최종 코드 품질 PR #10 검토·병합
 - 최종 실행 및 제출 증거 캡처
 
 ### 단계 기록
@@ -236,7 +250,37 @@ git diff --check
 - 테스트 결과: 메인 테스트 21개, 전체 46개 통과
 - 발생한 문제: 없음
 - 해결 방법: 해당 없음
-- 커밋: `895011f` 메뉴 복귀 기능, `04eb721` 메뉴 복귀 테스트
+- 커밋: `895011f` 메뉴 복귀 기능, `04eb721` 메뉴 복귀 테스트,
+  `3832cd5` 개발 로그
+- PR: #9 - https://github.com/juny030507/option-strategy-quiz/pull/9
+- 병합 결과: merge commit `4cd784a`
+- 남은 작업: 3-2~5단계
+
+### 단계 기록
+
+- 날짜: 2026-08-05
+- 단계: 3-2단계 - 최종 입력 검증과 코드 품질 점검
+- 작업 주체: VS Code Codex 보조 작업
+- 브랜치: `refactor/final-quality`
+- 목표: 검증된 동작을 유지하면서 모델·입력·게임 방어 경로와
+  금융 용어, PEP 8 일관성을 최종 점검
+- 수정 파일: `quiz.py`, `quiz_game.py`, `default_quizzes.py`,
+  `tests/test_quiz.py`, `tests/test_quiz_game.py`, `tests/test_main.py`,
+  `tests/test_default_quizzes.py`, `state.json`, `docs/development-log.md`
+- 설계 결정: `Quiz`가 빈 문제·선택지와 bool을 포함한 잘못된
+  정답을 거부하고, `QuizGame`도 bool 답안을 점수에 반영하지 않도록
+  함. `state.json`은 수정된 기본 퀴즈와 공개 저장 함수로 재생성
+- 주요 명령: `pycodestyle --max-line-length=88 *.py tests/*.py`,
+  `ruff check .`, `python3 -m unittest discover -s tests -v`,
+  `python3 -m json.tool state.json`, `git diff --check`
+- 테스트 결과: 기존 46개에 12개를 추가해 전체 58개 통과.
+  테스트 전후 `state.json` SHA-256가
+  `07ce4f9fcaa468ac21226fb3de07c1dd3d0872805006ad9fdd49f1e19e8a8a0f`로
+  같아 실제 상태 파일을 변경하지 않음
+- 발생한 문제: 없음
+- 해결 방법: 해당 없음
+- 커밋: `8713c95` 모델·용어 정리, `007a00e` 방어 경로 테스트,
+  `bdb4f42` 최신 기본 상태
 - PR: 생성 전
 - 병합 결과: 미병합
-- 남은 작업: PR #9 생성·검토·병합
+- 남은 작업: PR #10 생성·검토·병합 후 4~5단계
