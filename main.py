@@ -15,6 +15,7 @@ def show_menu() -> None:
     print("3. 퀴즈 목록")
     print("4. 점수 확인")
     print("5. 종료")
+    print("퀴즈 풀이·추가 중 0을 입력하면 메뉴로 돌아갑니다.")
     print("=" * 40)
 
 
@@ -64,26 +65,26 @@ def add_new_quiz(game: QuizGame) -> None:
     print("새 퀴즈 추가")
     print("=" * 40)
 
-    question = read_text("문제: ")
+    question = read_text("문제 (0: 메뉴): ")
 
-    if question is None:
+    if question is None or question == "0":
         print("퀴즈 추가를 취소하고 메뉴로 돌아갑니다.")
         return
 
     choices: list[str] = []
 
     for number in range(1, 5):
-        choice = read_text(f"선택지 {number}: ")
+        choice = read_text(f"선택지 {number} (0: 메뉴): ")
 
-        if choice is None:
+        if choice is None or choice == "0":
             print("퀴즈 추가를 취소하고 메뉴로 돌아갑니다.")
             return
 
         choices.append(choice)
 
-    answer = read_number("정답 번호 (1~4): ", 1, 4)
+    answer = read_number("정답 번호 (0: 메뉴, 1~4): ", 0, 4)
 
-    if answer is None:
+    if answer is None or answer == 0:
         print("퀴즈 추가를 취소하고 메뉴로 돌아갑니다.")
         return
 
@@ -134,10 +135,18 @@ def play_quizzes(game: QuizGame) -> None:
         print(f"\n[{quiz_number}/{quiz_count}]")
         quiz.display()
 
-        selected_answer = read_number("정답 선택 (1~4): ", 1, 4)
+        selected_answer = read_number(
+            "정답 선택 (0: 메뉴, 1~4): ",
+            0,
+            4,
+        )
 
         if selected_answer is None:
             print("퀴즈 풀이를 중단하고 메뉴로 돌아갑니다.")
+            return
+
+        if selected_answer == 0:
+            print("메인 메뉴로 돌아갑니다.")
             return
 
         if game.submit_answer(quiz, selected_answer):

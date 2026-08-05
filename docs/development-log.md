@@ -76,14 +76,18 @@
 - 테스트 커밋: `261d5b4`
 - 병합 커밋: `7554670`
 
-### 현재 작업: JSON 상태 저장
+### PR #8: JSON 게임 상태 저장 및 복원
 
 - 날짜: 2026-08-05
 - 브랜치: `feature/state-storage`
-- 기준 커밋: `7554670`
 - 핵심 기능: 프로젝트 루트 `state.json` 저장 계층, 데이터 검증과 복구,
   저장 단위 테스트, `main.py` 시작·종료 및 변경 시점 연결
-- 현재 상태: 아직 커밋하지 않은 작업이므로 이 기능 자체의 커밋 해시는 없음
+- 기능 커밋: `85cd205`, `7b4fc74`
+- 테스트 커밋: `9f36dbe`, `da94100`
+- 데이터 커밋: `adf0834`
+- 문서 커밋: `2f8de19`, `cbd3e1c`
+- PR: https://github.com/juny030507/option-strategy-quiz/pull/8
+- 병합 커밋: `4cee799`
 
 ## 테스트 증가 이력
 
@@ -96,6 +100,7 @@
 | 28개 | 사용자 퀴즈 관리 | 사용자 입력을 통한 추가와 목록 출력 검증 포함 |
 | 38개 | JSON 저장 계층 | 직렬화, 왕복 저장, 손상·누락·I/O 오류 복구 검증 포함 |
 | 42개 | main.py 저장 통합 | 시작 불러오기와 풀이·추가·종료 시 저장 호출 검증 포함 |
+| 46개 | 메뉴 복귀 | 풀이와 추가의 각 입력 단계에서 0으로 취소하는 흐름 포함 |
 
 ## 주요 문제와 해결
 
@@ -179,7 +184,7 @@ git diff --check
 ## 남은 작업
 
 - `state.json`의 최종 제출 방식 결정
-- 저장 기능 커밋, 푸시, PR
+- 메뉴 복귀 기능 PR #9
 - README 완성
 - GitHub Actions 구성
 - `main` 브랜치 보호 설정
@@ -205,11 +210,33 @@ git diff --check
 - 발생한 문제: `gh auth status`에서 기본 GitHub 계정 토큰이
   유효하지 않은 것으로 확인됨
 - 해결 방법: 인증을 우회하지 않고 안전한 로컬 커밋과 일반 push를
-  완료했으며 PR 생성·병합과 후속 단계는 재인증 전까지 중단
+  완료한 뒤 사용자가 웹 인증을 승인해 GitHub CLI 인증을 복구
 - 커밋: `85cd205` 저장 계층, `9f36dbe` 저장 테스트,
   `7b4fc74` 메인 연결, `da94100` 통합 테스트,
   `adf0834` 초기 상태 데이터, `2f8de19` 개발 로그
 - 원격 push: `origin/feature/state-storage` 생성 및 추적 설정 완료
-- PR: 미생성 - GitHub CLI 재인증 필요
+- PR: #8 - https://github.com/juny030507/option-strategy-quiz/pull/8
+- 병합 결과: merge commit `4cee799`
+- 남은 작업: 3~5단계
+
+### 단계 기록
+
+- 날짜: 2026-08-05
+- 단계: 3-1단계 - 퀴즈 흐름의 메인 메뉴 복귀
+- 작업 주체: VS Code Codex 보조 작업
+- 브랜치: `feature/menu-navigation`
+- 목표: 퀴즈 풀이와 추가의 모든 입력 단계에서 0으로 메인 메뉴에 복귀
+- 수정 파일: `main.py`, `tests/test_main.py`,
+  `docs/development-log.md`
+- 설계 결정: 0 입력은 점수와 미완성 퀴즈를 변경하지 않고 즉시 반환하며,
+  기존 Ctrl+C·EOF 처리와 메인 저장 호출은 유지
+- 주요 명령: `python3 -m py_compile main.py tests/test_main.py`,
+  `python3 -m unittest discover -s tests -p 'test_main.py' -v`,
+  `python3 -m unittest discover -s tests -v`, `git diff --check`
+- 테스트 결과: 메인 테스트 21개, 전체 46개 통과
+- 발생한 문제: 없음
+- 해결 방법: 해당 없음
+- 커밋: `895011f` 메뉴 복귀 기능, `04eb721` 메뉴 복귀 테스트
+- PR: 생성 전
 - 병합 결과: 미병합
-- 남은 작업: PR #8 생성·검토·병합 후 3~5단계
+- 남은 작업: PR #9 생성·검토·병합
