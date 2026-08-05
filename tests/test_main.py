@@ -5,7 +5,14 @@ import unittest
 from contextlib import redirect_stdout
 from unittest.mock import patch
 
-from main import main, play_quizzes, show_score
+from main import (
+    add_new_quiz,
+    main,
+    play_quizzes,
+    read_text,
+    show_quiz_list,
+    show_score,
+)
 from quiz import Quiz
 from quiz_game import QuizGame
 
@@ -96,6 +103,104 @@ class TestMainQuizFlow(unittest.TestCase):
                     main()
 
         mock_show_score.assert_called_once()
+
+    def test_read_text_retries_after_empty_input(self) -> None:
+        """빈 문자열 다음에 정상 문자열을 다시 입력받아야 한다."""
+        output = io.StringIO()
+
+        with patch(
+            "builtins.input",
+            side_effect=["", "정상 입력"],
+        ):
+            with redirect_stdout(output):
+                result = read_text("입력: ")
+
+        self.assertEqual(result, "정상 입력")
+        self.assertIn("빈 입력은 사용할 수 없습니다.", output.getvalue())
+
+    def test_add_new_quiz_from_input(self) -> None:
+        """입력받은 문제를 게임의 퀴즈 목록에 추가해야 한다."""
+        output = io.StringIO()
+        inputs = [
+            "스트래들 매수 전략의 구성은?",
+            "콜옵션 매수 + 풋옵션 매수",
+            "콜옵션 매도 + 풋옵션 매도",
+            "기초자산 매수 + 콜옵션 매도",
+            "기초자산 매수 + 풋옵션 매수",
+            "1",
+        ]
+
+        with patch("builtins.input", side_effect=inputs):
+            with redirect_stdout(output):
+                add_new_quiz(self.game)
+
+        added_quiz = self.game.quizzes[-1]
+
+        self.assertEqual(len(self.game.quizzes), 2)
+        self.assertEqual(
+            added_quiz.question,
+            "스트래들 매수 전략의 구성은?",
+        )
+        self.assertEqual(added_quiz.answer, 1)
+        self.assertIn("현재 총 2개", output.getvalue())
+
+    def test_add_new_quiz_cancels_on_interrupted_input(self) -> None:
+        """입력이 중단되면 새로운 퀴즈를 추가하지 않아야 한다."""
+        output = io.StringIO()
+
+        with patch("builtins.input", side_effect=EOFError):
+            with redirect_stdout(output):
+                add_new_quiz(self.game)
+
+        self.assertEqual(len(self.game.quizzes), 1)
+        self.assertIn("퀴즈 추가를 취소", output.getvalue())
+
+    def test_show_quiz_list_displays_registered_quiz(self) -> None:
+        """퀴즈 목록에 등록된 문제와 선택지를 출력해야 한다."""
+        output = io.StringIO()
+
+        with redirect_stdout(output):
+            show_quiz_list(self.game)
+
+        result = output.getvalue()
+        self.assertIn("퀴즈 목록: 총 1개", result)
+        self.assertIn("보호적 풋의 구성은?", result)
+        self.assertIn(
+            "기초자산 보유 + 풋옵션 매수",
+            result,
+        )
+
+    def test_show_quiz_list_handles_empty_game(self) -> None:
+        """등록된 퀴즈가 없으면 안내 문구를 출력해야 한다."""
+        empty_game = QuizGame()
+        output = io.StringIO()
+
+        with redirect_stdout(output):
+            show_quiz_list(empty_game)
+
+        self.assertIn("등록된 퀴즈가 없습니다.", output.getvalue())
+
+    def test_add_menu_calls_add_new_quiz(self) -> None:
+        """2번 메뉴를 선택하면 퀴즈 추가 함수를 호출해야 한다."""
+        output = io.StringIO()
+
+        with patch("main.read_number", side_effect=[2, 5]):
+            with patch("main.add_new_quiz") as mock_add_new_quiz:
+                with redirect_stdout(output):
+                    main()
+
+        mock_add_new_quiz.assert_called_once()
+
+    def test_list_menu_calls_show_quiz_list(self) -> None:
+        """3번 메뉴를 선택하면 퀴즈 목록 함수를 호출해야 한다."""
+        output = io.StringIO()
+
+        with patch("main.read_number", side_effect=[3, 5]):
+            with patch("main.show_quiz_list") as mock_show_quiz_list:
+                with redirect_stdout(output):
+                    main()
+
+        mock_show_quiz_list.assert_called_once()
 
 if __name__ == "__main__":
     unittest.main()
