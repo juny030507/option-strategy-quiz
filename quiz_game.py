@@ -2,6 +2,7 @@
 
 from quiz import Quiz
 
+
 class QuizGame:
     """퀴즈 추가, 정답 확인, 점수 계산을 담당한다."""
 
@@ -27,7 +28,7 @@ class QuizGame:
         if quiz not in self.quizzes:
             raise ValueError("게임에 등록되지 않은 퀴즈입니다.")
 
-        if selected_answer not in range(1, 5):
+        if type(selected_answer) is not int or not 1 <= selected_answer <= 4:
             raise ValueError("정답 번호는 1~4 사이여야 합니다.")
 
         self.attempt_count += 1
@@ -49,4 +50,3 @@ class QuizGame:
         """누적 점수와 풀이 횟수를 초기화한다."""
         self.correct_count = 0
         self.attempt_count = 0
-
