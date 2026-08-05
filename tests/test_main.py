@@ -1,4 +1,4 @@
-"""메인 프로그램의 퀴즈 풀이와 점수 출력을 겸증한다."""
+"""메인 프로그램의 퀴즈 풀이와 점수 출력을 검증한다."""
 
 import io
 import unittest
@@ -97,10 +97,12 @@ class TestMainQuizFlow(unittest.TestCase):
         """4번 메뉴를 선택하면 점수 출력 함수를 호출해야 한다."""
         output = io.StringIO()
 
-        with patch("main.read_number", side_effect=[4, 5]):
-            with patch("main.show_score") as mock_show_score:
-                with redirect_stdout(output):
-                    main()
+        with patch("main.load_state", return_value=self.game):
+            with patch("main.save_state"):
+                with patch("main.read_number", side_effect=[4, 5]):
+                    with patch("main.show_score") as mock_show_score:
+                        with redirect_stdout(output):
+                            main()
 
         mock_show_score.assert_called_once()
 
@@ -184,10 +186,12 @@ class TestMainQuizFlow(unittest.TestCase):
         """2번 메뉴를 선택하면 퀴즈 추가 함수를 호출해야 한다."""
         output = io.StringIO()
 
-        with patch("main.read_number", side_effect=[2, 5]):
-            with patch("main.add_new_quiz") as mock_add_new_quiz:
-                with redirect_stdout(output):
-                    main()
+        with patch("main.load_state", return_value=self.game):
+            with patch("main.save_state"):
+                with patch("main.read_number", side_effect=[2, 5]):
+                    with patch("main.add_new_quiz") as mock_add_new_quiz:
+                        with redirect_stdout(output):
+                            main()
 
         mock_add_new_quiz.assert_called_once()
 
@@ -195,12 +199,79 @@ class TestMainQuizFlow(unittest.TestCase):
         """3번 메뉴를 선택하면 퀴즈 목록 함수를 호출해야 한다."""
         output = io.StringIO()
 
-        with patch("main.read_number", side_effect=[3, 5]):
-            with patch("main.show_quiz_list") as mock_show_quiz_list:
-                with redirect_stdout(output):
-                    main()
+        with patch("main.load_state", return_value=self.game):
+            with patch("main.save_state"):
+                with patch("main.read_number", side_effect=[3, 5]):
+                    with patch("main.show_quiz_list") as mock_show_quiz_list:
+                        with redirect_stdout(output):
+                            main()
 
         mock_show_quiz_list.assert_called_once()
+
+    def test_main_loads_state_and_saves_on_normal_exit(self) -> None:
+        """시작 시 상태를 불러오고 정상 종료 시 저장해야 한다."""
+        output = io.StringIO()
+
+        with patch(
+            "main.load_state",
+            return_value=self.game,
+        ) as mock_load_state:
+            with patch("main.save_state") as mock_save_state:
+                with patch("main.read_number", return_value=5):
+                    with redirect_stdout(output):
+                        main()
+
+        mock_load_state.assert_called_once_with()
+        mock_save_state.assert_called_once_with(self.game)
+
+    def test_main_saves_after_playing_quizzes(self) -> None:
+        """퀴즈 풀이 후와 정상 종료 시 각각 상태를 저장해야 한다."""
+        output = io.StringIO()
+
+        with patch("main.load_state", return_value=self.game):
+            with patch("main.save_state") as mock_save_state:
+                with patch("main.read_number", side_effect=[1, 5]):
+                    with patch("main.play_quizzes") as mock_play_quizzes:
+                        with redirect_stdout(output):
+                            main()
+
+        mock_play_quizzes.assert_called_once_with(self.game)
+        self.assertEqual(mock_save_state.call_count, 2)
+        for save_call in mock_save_state.call_args_list:
+            self.assertIs(save_call.args[0], self.game)
+
+    def test_main_saves_after_adding_quiz(self) -> None:
+        """퀴즈 추가 후와 정상 종료 시 각각 상태를 저장해야 한다."""
+        output = io.StringIO()
+
+        with patch("main.load_state", return_value=self.game):
+            with patch("main.save_state") as mock_save_state:
+                with patch("main.read_number", side_effect=[2, 5]):
+                    with patch("main.add_new_quiz") as mock_add_new_quiz:
+                        with redirect_stdout(output):
+                            main()
+
+        mock_add_new_quiz.assert_called_once_with(self.game)
+        self.assertEqual(mock_save_state.call_count, 2)
+        for save_call in mock_save_state.call_args_list:
+            self.assertIs(save_call.args[0], self.game)
+
+    def test_main_saves_on_interrupted_menu_input(self) -> None:
+        """메뉴 입력 중단 시 상태를 저장하고 안전하게 종료해야 한다."""
+        output = io.StringIO()
+
+        with patch("main.load_state", return_value=self.game):
+            with patch("main.save_state") as mock_save_state:
+                with patch("main.read_number", return_value=None):
+                    with redirect_stdout(output):
+                        main()
+
+        mock_save_state.assert_called_once_with(self.game)
+        self.assertIn(
+            "퀴즈 게임을 안전하게 종료합니다.",
+            output.getvalue(),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
