@@ -1,6 +1,7 @@
 """옵션 투자기법 퀴즈 게임의 실행 파일."""
 
 from default_quizzes import create_default_quizzes
+from quiz import Quiz
 from quiz_game import QuizGame
 
 
@@ -39,6 +40,70 @@ def read_number(
         if minimum <= number <= maximum:
             return number
         print(f"{minimum}~{maximum} 사이의 숫자를 입력해주세요.")
+
+def read_text(prompt: str) -> str | None:
+    """비어 있지 않은 문자열을 입력받는다."""
+    while True:
+        try:
+            value = input(prompt).strip()
+        except (KeyboardInterrupt, EOFError):
+            print("\n입력이 중단되었습니다.")
+            return None
+
+        if value:
+            return value
+
+        print("빈 입력은 사용할 수 없습니다.")
+
+def add_new_quiz(game: QuizGame) -> None:
+    """사용자에게 문제 정보를 입력받아 퀴즈를 추가한다."""
+    print("\n" + "=" * 40)
+    print("새 퀴즈 추가")
+    print("=" * 40)
+
+    question = read_text("문제: ")
+
+    if question is None:
+        print("퀴즈 추가를 취소하고 메뉴로 돌아갑니다.")
+        return
+
+    choices: list[str] = []
+
+    for number in range(1, 5):
+        choice = read_text(f"선택지 {number}: ")
+
+        if choice is None:
+            print("퀴즈 추가를 취소하고 메뉴로 돌아갑니다.")
+            return
+
+        choices.append(choice)
+
+    answer = read_number("정답 번호 (1~4): ", 1, 4)
+
+    if answer is None:
+        print("퀴즈 추가를 취소하고 메뉴로 돌아갑니다.")
+        return
+
+    quiz = Quiz(question, choices, answer)
+    game.add_quiz(quiz)
+
+    print(f"퀴즈가 추가되었습니다. 현재 총 {len(game.quizzes)}개입니다.")
+
+def show_quiz_list(game: QuizGame) -> None:
+    """등록된 퀴즈의 문제와 선택지를 출력한다."""
+    if not game.quizzes:
+        print("\n등록된 퀴즈가 없습니다.")
+        return
+
+    print("\n" + "=" * 40)
+    print(f"퀴즈 목록: 총 {len(game.quizzes)}개")
+    print("=" * 40)
+
+    for quiz_number, quiz in enumerate(game.quizzes, start=1):
+        print(f"\n{quiz_number}. {quiz.question}")
+
+        for choice_number, choice in enumerate(quiz.choices, start=1):
+            print(f"   {choice_number}) {choice}")
 
 def show_score(game: QuizGame) -> None:
     """현재까지 누적된 점수와 정답률을 출력한다."""
@@ -96,9 +161,9 @@ def main() -> None:
         if choice == 1:
             play_quizzes(game)
         elif choice == 2:
-            print("퀴즈 추가 기능을 준비 중입니다.")
+            add_new_quiz(game)
         elif choice == 3:
-            print("퀴즈 목록 기능을 준비 중입니다.")
+            show_quiz_list(game)
         elif choice == 4:
             show_score(game)
         elif choice == 5:
