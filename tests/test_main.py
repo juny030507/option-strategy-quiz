@@ -9,12 +9,14 @@ from main import (
     add_new_quiz,
     main,
     play_quizzes,
+    read_number,
     read_text,
     show_quiz_list,
     show_score,
 )
 from quiz import Quiz
 from quiz_game import QuizGame
+
 
 class TestMainQuizFlow(unittest.TestCase):
     """퀴즈 풀이와 점수 출력 흐름을 테스트한다."""
@@ -119,6 +121,50 @@ class TestMainQuizFlow(unittest.TestCase):
 
         self.assertEqual(result, "정상 입력")
         self.assertIn("빈 입력은 사용할 수 없습니다.", output.getvalue())
+
+    def test_read_number_retries_after_empty_input(self) -> None:
+        """빈 입력 다음에 범위 내 정수를 다시 입력받는다."""
+        output = io.StringIO()
+
+        with patch("builtins.input", side_effect=["", "2"]):
+            with redirect_stdout(output):
+                result = read_number("입력: ", 1, 5)
+
+        self.assertEqual(result, 2)
+        self.assertIn("빈 입력은 사용할 수 없습니다.", output.getvalue())
+
+    def test_read_number_retries_after_non_numeric_input(self) -> None:
+        """숫자가 아닌 입력 다음에 정상 정수를 다시 입력받는다."""
+        output = io.StringIO()
+
+        with patch("builtins.input", side_effect=["abc", "2"]):
+            with redirect_stdout(output):
+                result = read_number("입력: ", 1, 5)
+
+        self.assertEqual(result, 2)
+        self.assertIn("숫자만 입력할 수 있습니다.", output.getvalue())
+
+    def test_read_number_retries_after_out_of_range_input(self) -> None:
+        """범위 밖 입력 다음에 정상 정수를 다시 입력받는다."""
+        output = io.StringIO()
+
+        with patch("builtins.input", side_effect=["9", "4"]):
+            with redirect_stdout(output):
+                result = read_number("입력: ", 1, 5)
+
+        self.assertEqual(result, 4)
+        self.assertIn("1~5 사이의 숫자", output.getvalue())
+
+    def test_read_number_returns_none_on_eof(self) -> None:
+        """EOF로 입력이 종료되면 None과 중단 안내를 반환한다."""
+        output = io.StringIO()
+
+        with patch("builtins.input", side_effect=EOFError):
+            with redirect_stdout(output):
+                result = read_number("입력: ", 1, 5)
+
+        self.assertIsNone(result)
+        self.assertIn("입력이 중단되었습니다.", output.getvalue())
 
     def test_add_new_quiz_from_input(self) -> None:
         """입력받은 문제를 게임의 퀴즈 목록에 추가해야 한다."""

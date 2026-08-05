@@ -2,6 +2,7 @@
 
 from quiz import Quiz
 
+
 def create_default_quizzes() -> list[Quiz]:
     """프로그램 첫 실행에 사용할 기본 퀴즈를 생성한다."""
     return [
@@ -11,7 +12,7 @@ def create_default_quizzes() -> list[Quiz]:
                 "강세장 예상",
                 "약세장 예상",
                 "가격 변동이 전혀 없을 것으로 예상",
-                "기초자산 가격과 관계 없음", 
+                "기초자산 가격과 관계 없음",
             ],
             1,
         ),
@@ -28,13 +29,13 @@ def create_default_quizzes() -> list[Quiz]:
         Quiz(
             "콜옵션 매수자의 만기 손익분기점으로 옳은 것은?",
             [
-                 "행사가격 - 콜 프리미엄",
-                 "행사가격 + 콜 프리미엄",
-                 "콜 프리미엄 - 행사가격",
+                "행사가격 - 콜 프리미엄",
+                "행사가격 + 콜 프리미엄",
+                "콜 프리미엄 - 행사가격",
                 "행사가격",
             ],
-             2,
-),
+            2,
+        ),
         Quiz(
             "보호적 풋(Protective Put)의 구성으로 옳은 것은?",
             [
@@ -46,7 +47,7 @@ def create_default_quizzes() -> list[Quiz]:
             3,
         ),
         Quiz(
-            "보증된 콜(Covered Call)의 구성으로 옳은 것은?",
+            "커버드 콜(Covered Call)의 구성으로 옳은 것은?",
             [
                 "기초자산 없이 콜옵션 매도",
                 "기초자산 보유 + 풋옵션 매수",
@@ -106,4 +107,3 @@ def create_default_quizzes() -> list[Quiz]:
             4,
         ),
     ]
-
