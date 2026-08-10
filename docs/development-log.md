@@ -422,7 +422,10 @@ git diff --check
   드러나지 않는 캡처 페이지로 표시해 기능별 JPEG 8장을 만들고,
   실제 Terminal·VS Code·GitHub 캡처는 사용자 체크리스트로 분리
 - 커밋: `a3230b4` 세션 최고 점수 저장·복원 구현 및 테스트
-- PR: [#13 Feat: 완료 회차 최고 점수와 실행 화면 추가](https://github.com/juny030507/option-strategy-quiz/pull/13) (Draft)
+- PR: [#13 Feat: 완료 회차 최고 점수와 실행 화면 추가](https://github.com/juny030507/option-strategy-quiz/pull/13)
 - 원격 검사: [GitHub Actions 실행 31366738007](https://github.com/juny030507/option-strategy-quiz/actions/runs/31366738007)의
   `Python 3.10 unit tests` 성공
-- 남은 작업: 사용자 코드 리뷰 후 Ready 전환·병합
+- 병합 결과: Ready 전환 후 merge commit `fca0e08`로 `main` 병합,
+  [main Actions 실행 31367485364](https://github.com/juny030507/option-strategy-quiz/actions/runs/31367485364) 성공
+- 남은 작업: 사용자의 실제 Terminal·VS Code·GitHub 제출 화면 캡처와
+  코드 리뷰 학습

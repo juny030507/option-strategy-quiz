@@ -8,6 +8,7 @@
 - [x] README 상대 링크 확인
 - [x] `state.json` JSON 문법, 10문제·최고 점수 0/0·누적 0/0 확인
 - [x] GitHub Actions의 PR·`main` push 실행 성공 확인
+- [x] PR #13을 merge commit `fca0e08`로 `main`에 병합
 - [x] `main` 브랜치 보호 규칙 API 재조회 확인
 - [x] `git diff --check` 통과
 

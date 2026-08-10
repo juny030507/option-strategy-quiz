@@ -20,6 +20,8 @@ GitHub Actions·브랜치 보호 증거
   결과: success, 58 tests OK
 - PR #13: https://github.com/juny030507/option-strategy-quiz/actions/runs/31366738007
   결과: success, 67 tests OK
+- PR #13 병합 후 main push: https://github.com/juny030507/option-strategy-quiz/actions/runs/31367485364
+  결과: success, 67 tests OK, merge commit fca0e08
 - 상태 검사 이름: Python 3.10 unit tests
 
 main 브랜치 보호:
