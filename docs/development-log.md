@@ -423,4 +423,6 @@ git diff --check
   실제 Terminal·VS Code·GitHub 캡처는 사용자 체크리스트로 분리
 - 커밋: `a3230b4` 세션 최고 점수 저장·복원 구현 및 테스트
 - PR: [#13 Feat: 완료 회차 최고 점수와 실행 화면 추가](https://github.com/juny030507/option-strategy-quiz/pull/13) (Draft)
-- 남은 작업: PR #13 자동 검사 확인, 사용자 코드 리뷰 후 Ready 전환·병합
+- 원격 검사: [GitHub Actions 실행 31366738007](https://github.com/juny030507/option-strategy-quiz/actions/runs/31366738007)의
+  `Python 3.10 unit tests` 성공
+- 남은 작업: 사용자 코드 리뷰 후 Ready 전환·병합
