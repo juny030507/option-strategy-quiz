@@ -101,6 +101,8 @@
       "answer": 4
     }
   ],
+  "best_score": 0,
+  "best_total": 0,
   "score": {
     "correct_count": 0,
     "attempt_count": 0

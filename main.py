@@ -112,10 +112,21 @@ def show_quiz_list(game: QuizGame) -> None:
 
 
 def show_score(game: QuizGame) -> None:
-    """현재까지 누적된 점수와 정답률을 출력한다."""
+    """최고 점수와 현재까지 누적된 풀이 통계를 출력한다."""
     print("\n" + "=" * 40)
-    print("현재 점수")
+    print("점수 확인")
     print("=" * 40)
+
+    if game.best_total == 0:
+        print("아직 완료한 퀴즈가 없어 최고 점수가 없습니다.")
+    else:
+        print(
+            f"최고 점수: {game.best_score}개 정답 "
+            f"(총 {game.best_total}문제)"
+        )
+
+    print("-" * 40)
+    print("누적 풀이 통계")
     print(f"푼 문제: {game.attempt_count}개")
     print(f"맞힌 문제: {game.correct_count}개")
     print(f"정답률: {game.calculate_accuracy():.1f}%")
@@ -129,6 +140,7 @@ def play_quizzes(game: QuizGame) -> None:
         return
 
     quiz_count = len(game.quizzes)
+    session_score = 0
     print(f"\n총 {quiz_count}개의 퀴즈를 시작합니다.")
 
     for quiz_number, quiz in enumerate(game.quizzes, start=1):
@@ -150,6 +162,7 @@ def play_quizzes(game: QuizGame) -> None:
             return
 
         if game.submit_answer(quiz, selected_answer):
+            session_score += 1
             print("정답입니다!")
         else:
             correct_choice = quiz.choices[quiz.answer - 1]
@@ -159,6 +172,11 @@ def play_quizzes(game: QuizGame) -> None:
             )
 
     print("\n모든 퀴즈를 풀었습니다.")
+    print(f"이번 결과: {quiz_count}문제 중 {session_score}문제 정답")
+
+    if game.update_best_score(session_score, quiz_count):
+        print("새로운 최고 점수입니다!")
+
     show_score(game)
 
 

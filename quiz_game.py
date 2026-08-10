@@ -15,6 +15,8 @@ class QuizGame:
 
         self.correct_count = 0
         self.attempt_count = 0
+        self.best_score = 0
+        self.best_total = 0
 
     def add_quiz(self, quiz: Quiz) -> None:
         """게임에 새로운 퀴즈를 추가한다."""
@@ -45,6 +47,25 @@ class QuizGame:
             return 0.0
 
         return (self.correct_count / self.attempt_count) * 100
+
+    def update_best_score(
+        self,
+        session_score: int,
+        total_questions: int,
+    ) -> bool:
+        """완료한 한 회차의 점수가 최고 기록이면 갱신한다."""
+        if type(session_score) is not int or type(total_questions) is not int:
+            raise TypeError("점수와 문제 수는 정수여야 합니다.")
+
+        if total_questions <= 0 or not 0 <= session_score <= total_questions:
+            raise ValueError("점수는 0부터 전체 문제 수 사이여야 합니다.")
+
+        if self.best_total == 0 or session_score > self.best_score:
+            self.best_score = session_score
+            self.best_total = total_questions
+            return True
+
+        return False
 
     def reset_score(self) -> None:
         """누적 점수와 풀이 횟수를 초기화한다."""

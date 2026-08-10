@@ -105,14 +105,60 @@ class TestQuizGame(unittest.TestCase):
         """아직 문제를 풀지 않았다면 정답률은 0이어야 한다."""
         self.assertEqual(self.game.calculate_accuracy(), 0.0)
 
+    def test_first_completed_session_sets_best_score(self) -> None:
+        """첫 완료 회차는 0점이어도 최고 기록으로 저장해야 한다."""
+        updated = self.game.update_best_score(0, 1)
+
+        self.assertTrue(updated)
+        self.assertEqual(self.game.best_score, 0)
+        self.assertEqual(self.game.best_total, 1)
+
+    def test_higher_session_score_updates_best_score(self) -> None:
+        """기존 기록보다 높은 회차 점수로 최고 기록을 갱신해야 한다."""
+        self.game.update_best_score(1, 4)
+
+        updated = self.game.update_best_score(3, 4)
+
+        self.assertTrue(updated)
+        self.assertEqual(self.game.best_score, 3)
+        self.assertEqual(self.game.best_total, 4)
+
+    def test_lower_session_score_keeps_best_score(self) -> None:
+        """기존 기록보다 낮은 회차 점수는 최고 기록을 바꾸지 않는다."""
+        self.game.update_best_score(3, 4)
+
+        updated = self.game.update_best_score(2, 5)
+
+        self.assertFalse(updated)
+        self.assertEqual(self.game.best_score, 3)
+        self.assertEqual(self.game.best_total, 4)
+
+    def test_update_best_score_rejects_invalid_values(self) -> None:
+        """잘못된 회차 점수와 문제 수는 최고 기록에 반영하지 않는다."""
+        invalid_values = ((-1, 4), (5, 4), (0, 0), (True, 4), (1, "4"))
+
+        for session_score, total_questions in invalid_values:
+            with self.subTest(
+                score=session_score,
+                total=total_questions,
+            ):
+                with self.assertRaises((TypeError, ValueError)):
+                    self.game.update_best_score(
+                        session_score,
+                        total_questions,
+                    )
+
     def test_reset_score(self) -> None:
-        """점수를 초기화하면 정답 수와 풀이 수가 모두 0이 되어야 한다."""
+        """누적 통계를 초기화해도 최고 점수는 유지되어야 한다."""
         self.game.submit_answer(self.quiz, 1)
+        self.game.update_best_score(1, 1)
 
         self.game.reset_score()
 
         self.assertEqual(self.game.correct_count, 0)
         self.assertEqual(self.game.attempt_count, 0)
+        self.assertEqual(self.game.best_score, 1)
+        self.assertEqual(self.game.best_total, 1)
 
 
 if __name__ == "__main__":
