@@ -29,6 +29,8 @@ def game_to_dict(game: QuizGame) -> dict[str, object]:
 
     return {
         "quizzes": quizzes,
+        "best_score": game.best_score,
+        "best_total": game.best_total,
         "score": {
             "correct_count": game.correct_count,
             "attempt_count": game.attempt_count,
@@ -99,6 +101,19 @@ def load_state(path: str | Path = STATE_FILE) -> QuizGame:
 
         quizzes = [quiz_from_dict(quiz_data) for quiz_data in quizzes_data]
 
+        best_score = data.get("best_score", 0)
+        best_total = data.get("best_total", 0)
+
+        if (
+            type(best_score) is not int
+            or type(best_total) is not int
+            or best_score < 0
+            or best_total < 0
+            or best_score > best_total
+            or (best_total == 0 and best_score != 0)
+        ):
+            raise ValueError("최고 점수 데이터가 올바르지 않습니다.")
+
         score = data.get("score")
         if not isinstance(score, dict):
             raise ValueError("점수 데이터는 사전이어야 합니다.")
@@ -118,6 +133,8 @@ def load_state(path: str | Path = STATE_FILE) -> QuizGame:
             raise ValueError("정답 수는 풀이 수보다 클 수 없습니다.")
 
         game = QuizGame(quizzes)
+        game.best_score = best_score
+        game.best_total = best_total
         game.correct_count = correct_count
         game.attempt_count = attempt_count
         return game

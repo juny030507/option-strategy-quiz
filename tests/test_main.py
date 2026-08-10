@@ -84,6 +84,51 @@ class TestMainQuizFlow(unittest.TestCase):
         self.assertIn("맞힌 문제: 1개", result)
         self.assertIn("정답률: 100.0%", result)
 
+    def test_show_score_displays_best_score(self) -> None:
+        """완료한 퀴즈가 있으면 최고 점수를 출력해야 한다."""
+        self.game.update_best_score(1, 1)
+        output = io.StringIO()
+
+        with redirect_stdout(output):
+            show_score(self.game)
+
+        self.assertIn("최고 점수: 1개 정답 (총 1문제)", output.getvalue())
+
+    def test_show_score_handles_no_completed_session(self) -> None:
+        """완료한 퀴즈가 없으면 최고 점수가 없다고 안내해야 한다."""
+        output = io.StringIO()
+
+        with redirect_stdout(output):
+            show_score(self.game)
+
+        self.assertIn("최고 점수가 없습니다.", output.getvalue())
+
+    def test_completed_quiz_updates_best_score(self) -> None:
+        """모든 문제를 풀면 이번 결과를 최고 점수와 비교해야 한다."""
+        output = io.StringIO()
+
+        with patch("builtins.input", return_value="1"):
+            with redirect_stdout(output):
+                play_quizzes(self.game)
+
+        self.assertEqual(self.game.best_score, 1)
+        self.assertEqual(self.game.best_total, 1)
+        self.assertIn("이번 결과: 1문제 중 1문제 정답", output.getvalue())
+        self.assertIn("새로운 최고 점수입니다!", output.getvalue())
+
+    def test_lower_completed_score_keeps_best_score(self) -> None:
+        """낮은 회차 점수는 저장된 최고 점수를 바꾸지 않아야 한다."""
+        self.game.update_best_score(1, 1)
+        output = io.StringIO()
+
+        with patch("builtins.input", return_value="2"):
+            with redirect_stdout(output):
+                play_quizzes(self.game)
+
+        self.assertEqual(self.game.best_score, 1)
+        self.assertEqual(self.game.best_total, 1)
+        self.assertNotIn("새로운 최고 점수입니다!", output.getvalue())
+
     def test_interrupted_input_returns_without_scoring(self) -> None:
         """입력이 중단되면 점수를 변경하지 않고 돌아가야 한다."""
         output = io.StringIO()
@@ -93,6 +138,7 @@ class TestMainQuizFlow(unittest.TestCase):
                 play_quizzes(self.game)
 
             self.assertEqual(self.game.attempt_count, 0)
+            self.assertEqual(self.game.best_total, 0)
             self.assertIn("퀴즈 풀이를 중단", output.getvalue())
 
     def test_score_menu_calls_show_score(self) -> None:
@@ -329,6 +375,7 @@ class TestMainQuizFlow(unittest.TestCase):
 
         self.assertEqual(len(self.game.quizzes), quiz_count)
         self.assertEqual(self.game.attempt_count, 0)
+        self.assertEqual(self.game.best_total, 0)
         self.assertIn("메인 메뉴로 돌아갑니다.", output.getvalue())
 
     def test_add_new_quiz_returns_to_menu_on_zero_question(self) -> None:

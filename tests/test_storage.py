@@ -50,6 +50,8 @@ class TestStorage(unittest.TestCase):
         self.assertGreaterEqual(len(game.quizzes), 10)
         self.assertEqual(game.correct_count, 0)
         self.assertEqual(game.attempt_count, 0)
+        self.assertEqual(game.best_score, 0)
+        self.assertEqual(game.best_total, 0)
         self.assertIn("저장 파일이 없어", output.getvalue())
 
     def test_game_to_dict_contains_quizzes_and_score(self) -> None:
@@ -62,11 +64,14 @@ class TestStorage(unittest.TestCase):
         game = QuizGame([quiz])
         game.correct_count = 2
         game.attempt_count = 3
+        game.update_best_score(2, 3)
 
         data = game_to_dict(game)
 
         self.assertIn("quizzes", data)
         self.assertIn("score", data)
+        self.assertEqual(data["best_score"], 2)
+        self.assertEqual(data["best_total"], 3)
         self.assertEqual(data["quizzes"][0]["question"], quiz.question)
         self.assertEqual(data["quizzes"][0]["choices"], quiz.choices)
         self.assertEqual(data["quizzes"][0]["answer"], quiz.answer)
@@ -162,6 +167,7 @@ class TestStorage(unittest.TestCase):
         game = QuizGame([quiz])
         game.correct_count = 2
         game.attempt_count = 4
+        game.update_best_score(3, 4)
 
         self.assertTrue(save_state(game, self.state_path))
         loaded_game = load_state(self.state_path)
@@ -171,6 +177,8 @@ class TestStorage(unittest.TestCase):
         self.assertEqual(loaded_game.quizzes[0].answer, quiz.answer)
         self.assertEqual(loaded_game.correct_count, 2)
         self.assertEqual(loaded_game.attempt_count, 4)
+        self.assertEqual(loaded_game.best_score, 3)
+        self.assertEqual(loaded_game.best_total, 4)
 
     def test_corrupted_json_returns_default_game(self) -> None:
         """문법이 깨진 JSON이면 안내 후 기본 게임으로 복구해야 한다."""
@@ -184,6 +192,7 @@ class TestStorage(unittest.TestCase):
         self.assertGreaterEqual(len(game.quizzes), 10)
         self.assertEqual(game.correct_count, 0)
         self.assertEqual(game.attempt_count, 0)
+        self.assertEqual(game.best_total, 0)
         self.assertIn("손상", output.getvalue())
 
     def test_invalid_state_values_return_default_game(self) -> None:
@@ -222,6 +231,18 @@ class TestStorage(unittest.TestCase):
                 "quizzes": [valid_quiz],
                 "score": {"correct_count": "0", "attempt_count": 1},
             },
+            "best_greater_than_total": {
+                "quizzes": [valid_quiz],
+                "best_score": 2,
+                "best_total": 1,
+                "score": {"correct_count": 0, "attempt_count": 0},
+            },
+            "boolean_best_score": {
+                "quizzes": [valid_quiz],
+                "best_score": True,
+                "best_total": 1,
+                "score": {"correct_count": 0, "attempt_count": 0},
+            },
         }
 
         for case_name, invalid_state in invalid_states.items():
@@ -239,7 +260,32 @@ class TestStorage(unittest.TestCase):
                 self.assertGreaterEqual(len(game.quizzes), 10)
                 self.assertEqual(game.correct_count, 0)
                 self.assertEqual(game.attempt_count, 0)
+                self.assertEqual(game.best_total, 0)
                 self.assertIn("손상", output.getvalue())
+
+    def test_legacy_state_without_best_score_loads_with_default(self) -> None:
+        """기존 누적 점수 파일도 최고 점수 0으로 불러와야 한다."""
+        legacy_state = {
+            "quizzes": [
+                {
+                    "question": "기존 문제",
+                    "choices": ["선택지1", "선택지2", "선택지3", "선택지4"],
+                    "answer": 1,
+                }
+            ],
+            "score": {"correct_count": 1, "attempt_count": 2},
+        }
+        self.state_path.write_text(
+            json.dumps(legacy_state, ensure_ascii=False),
+            encoding="utf-8",
+        )
+
+        game = load_state(self.state_path)
+
+        self.assertEqual(game.best_score, 0)
+        self.assertEqual(game.best_total, 0)
+        self.assertEqual(game.correct_count, 1)
+        self.assertEqual(game.attempt_count, 2)
 
     def test_save_os_error_returns_false(self) -> None:
         """저장 중 OSError가 발생하면 안내 후 False를 반환해야 한다."""
