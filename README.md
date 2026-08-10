@@ -10,7 +10,7 @@
 Codyssey 입학 연수 과제로 객체지향 설계, 입력 검증, JSON 영속성,
 단위 테스트, Git·GitHub 기반 개발 흐름을 한 프로그램에서 연습했습니다.
 사용자는 기본 퀴즈를 풀고, 직접 문제를 추가하며, 재실행 후에도
-퀴즈와 누적 점수를 이어서 사용할 수 있습니다.
+퀴즈, 누적 풀이 통계와 한 회차 최고 점수를 이어서 사용할 수 있습니다.
 
 ### 옵션 투자기법을 선택한 이유
 
@@ -36,7 +36,7 @@ python3 main.py
 python3 -m unittest discover -s tests -v
 ```
 
-현재 총 58개의 테스트가 모델, 퀴즈 흐름, 입력 방어, 저장·복구와
+현재 총 67개의 테스트가 모델, 퀴즈 흐름, 입력 방어, 저장·복구와
 `main.py` 통합 흐름을 검증합니다.
 
 ## 메뉴와 사용법
@@ -46,7 +46,7 @@ python3 -m unittest discover -s tests -v
 | 1 | 퀴즈 풀기 | 등록된 문제를 차례로 풀고 즉시 채점합니다. |
 | 2 | 퀴즈 추가 | 문제, 선택지 4개, 정답 번호를 입력해 사용자 퀴즈를 추가합니다. |
 | 3 | 퀴즈 목록 | 기본·사용자 퀴즈의 문제와 선택지를 보여줍니다. |
-| 4 | 점수 확인 | 풀이 수, 정답 수, 정답률을 보여줍니다. |
+| 4 | 점수 확인 | 한 회차 최고 점수와 누적 풀이 수·정답 수·정답률을 보여줍니다. |
 | 5 | 종료 | 현재 상태를 저장하고 종료합니다. |
 
 - 퀴즈 풀이나 추가 중 `0`을 입력하면 현재 답안을 채점하거나 미완성
@@ -57,12 +57,49 @@ python3 -m unittest discover -s tests -v
 - `Ctrl+C`나 EOF로 입력이 끝나면 퀴즈 풀이·추가를 안전하게 취소하고,
   메뉴 입력 중이었다면 현재 상태를 저장한 뒤 프로그램을 종료합니다.
 
+## 실행 화면
+
+아래 이미지는 현재 브랜치에서 프로그램과 테스트를 실제로 실행한 결과를
+개인정보가 드러나지 않도록 정리해 캡처한 것입니다.
+
+### 메인 메뉴와 퀴즈 관리
+
+![메인 메뉴](docs/screenshots/menu.jpg)
+
+![사용자 퀴즈 추가](docs/screenshots/add.jpg)
+
+![퀴즈 목록](docs/screenshots/list.jpg)
+
+### 퀴즈 풀이와 최고 점수
+
+![퀴즈 풀이 후 최고 점수 갱신](docs/screenshots/play.jpg)
+
+![최고 점수와 누적 풀이 통계](docs/screenshots/score.jpg)
+
+### 개발 환경과 검증
+
+![Python과 Git 개발 환경](docs/screenshots/environment.jpg)
+
+![전체 67개 자동 테스트 통과](docs/screenshots/tests.jpg)
+
+![최고 점수 기능 브랜치와 커밋 이력](docs/screenshots/git.jpg)
+
+과제 제출용 실제 Terminal·VS Code·GitHub 화면은
+[최종 제출 체크리스트](docs/evidence/submission-checklist.md)에 따라 사용자가
+추가로 캡처합니다.
+
 ## 퀴즈와 점수
 
 첫 실행 상태에는 10개의 기본 퀴즈가 있습니다. 사용자가 추가한 퀴즈도
-동일하게 풀이·목록·저장 대상이 됩니다. 답안을 제출할 때마다 풀이 수가
-증가하고, 정답이면 정답 수도 증가합니다. 정답률은
+동일하게 풀이·목록·저장 대상이 됩니다. 답안을 제출할 때마다 누적 풀이
+수가 증가하고, 정답이면 누적 정답 수도 증가합니다. 정답률은
 `correct_count / attempt_count * 100`으로 계산하며, 풀이 전에는 0.0%입니다.
+
+등록된 문제를 끝까지 모두 풀면 그 회차의 정답 수를 기존 최고 점수와
+비교합니다. 더 높은 정답 수이거나 첫 완료 회차이면 `best_score`와
+`best_total`을 갱신합니다. `0`, `Ctrl+C`, EOF로 중간에 메뉴로 돌아간
+미완료 회차는 최고 기록에 반영하지 않습니다. 누적 풀이 통계를
+초기화하더라도 최고 점수는 별도 기록으로 유지됩니다.
 
 ## `state.json` 저장과 복구
 
@@ -92,6 +129,8 @@ python3 -m unittest discover -s tests -v
       "answer": 4
     }
   ],
+  "best_score": 0,
+  "best_total": 0,
   "score": {
     "correct_count": 0,
     "attempt_count": 0
@@ -100,8 +139,9 @@ python3 -m unittest discover -s tests -v
 ```
 
 제출용 `state.json`은 모든 사용자가 같은 첫 실행 상태에서 시작하도록
-개인 검증 데이터를 제거하고 기본 10문제, `correct_count: 0`,
-`attempt_count: 0`으로 초기화했습니다. JSON을 손으로 조립하지 않고
+개인 검증 데이터를 제거하고 기본 10문제, `best_score: 0`,
+`best_total: 0`, `correct_count: 0`, `attempt_count: 0`으로
+초기화했습니다. JSON을 손으로 조립하지 않고
 `create_default_game()`과 `save_state()`로 재생성했습니다.
 
 ## 프로젝트 구조
@@ -113,7 +153,8 @@ option-strategy-quiz/
 │       └── tests.yml
 ├── docs/
 │   ├── development-log.md
-│   └── evidence/                 # 최종 검증·제출 증거
+│   ├── evidence/                 # 최종 검증·제출 증거
+│   └── screenshots/              # README 실행 화면
 ├── tests/
 │   ├── test_default_quizzes.py
 │   ├── test_main.py
@@ -132,7 +173,7 @@ option-strategy-quiz/
 | 구성 요소 | 책임 |
 | --- | --- |
 | `Quiz` | 빈 문제·선택지를 거부하고 문제, 선택지 4개, 1~4 정답을 관리합니다. |
-| `QuizGame` | `Quiz` 목록, 답안 채점, 정답·풀이 수, 정답률을 관리합니다. |
+| `QuizGame` | `Quiz` 목록, 답안 채점, 누적 통계와 완료 회차의 최고 점수를 관리합니다. |
 | `storage.py` | 게임과 JSON 사전 변환, UTF-8 파일 저장·불러오기, 오류 복구를 담당합니다. |
 | `main.py` | 메뉴, 안전한 입력, 풀이·추가·목록·점수 흐름과 저장 시점을 연결합니다. |
 
@@ -140,7 +181,7 @@ option-strategy-quiz/
 
 `.github/workflows/tests.yml`은 `main` 대상 push와 pull request에서 실행됩니다.
 `ubuntu-latest`, `actions/checkout@v6`, `actions/setup-python@v5`, Python 3.10을
-사용하고 `python -m unittest discover -s tests -v`로 58개 테스트를 검증합니다.
+사용하고 `python -m unittest discover -s tests -v`로 67개 테스트를 검증합니다.
 워크플로 권한은 `contents: read`로 제한했으며, `main` 브랜치는 PR과
 성공한 `Python 3.10 unit tests` 검사를 필수로 합니다.
 
@@ -160,6 +201,7 @@ merge commit 방식으로 병합했습니다. PR #6부터는 Draft로 시작해 
 | #10 | 모델 불변 조건, 방어 테스트, 금융 용어·PEP 8 정리 |
 | #11 | Python 3.10 GitHub Actions와 `main` 자동 테스트 |
 | #12 | README, 개발 로그, 제출 증거와 깨끗한 clone 검증 |
+| #13 | 완료 회차 최고 점수 저장·복원, 테스트와 실행 화면 문서화 |
 
 주요 문제와 학습 내용은 다음과 같습니다.
 
@@ -176,9 +218,12 @@ merge commit 방식으로 병합했습니다. PR #6부터는 Draft로 시작해 
 
 ## 개발 주체
 
-- PR #1부터 최종 문서 단계까지 설계, 구현, 테스트, Git·GitHub 작업과
-  문서화를 사용자가 직접 수행했습니다.
-- GitHub 인증·승인, 최종 코드 리뷰·스터디와 UI 스크린샷 캡처도
+- 사용자가 기능 목표와 학습 방향을 정하고, 단계별 실행·검증과 최종
+  코드 리뷰를 진행했습니다.
+- ChatGPT Codex와 VS Code Codex는 코드 초안, 테스트, 검토, 문서와
+  실행 결과 캡처를 보조했습니다. 상세 작업 주체와 검증 명령은
+  개발 과정 기록에 남겼습니다.
+- GitHub 인증·병합 승인과 실제 Terminal·VS Code·GitHub 화면 캡처는
   사용자가 직접 진행합니다.
 
 커밋·PR·테스트·영속성 검증의 상세 이력은

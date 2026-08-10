@@ -392,6 +392,35 @@ git diff --check
 - 해결 방법: 코드 블록을 닫고 과제 요구 항목을 실제 코드·Git·CI
   상태와 대조해 README를 재작성
 - 커밋: `ec56c8c` README 사용법과 구조, 최종 문서·증거 정리 커밋
-- PR: [#12 Docs: README와 최종 제출 자료 완성](https://github.com/juny030507/option-strategy-quiz/pull/12) (Draft)
-- 병합 결과: 필수 검사 `Python 3.10 unit tests` 성공, Ready 전환·병합 전
-- 남은 작업: PR #12 Ready 전환·병합과 최신 `main` 최종 검증
+- PR: [#12 Docs: README와 최종 제출 자료 완성](https://github.com/juny030507/option-strategy-quiz/pull/12)
+- 병합 결과: 필수 검사 성공 후 merge commit `ce56118`로 `main` 병합
+- 남은 작업: 최고 점수와 제출용 실행 화면 보강
+
+### 단계 기록
+
+- 날짜: 2026-08-10
+- 단계: 추가 개선 - 완료 회차 최고 점수와 README 실행 화면
+- 작업 주체: 사용자 요청에 따른 ChatGPT Codex 보조 작업
+- 브랜치: `agent/best-score-screenshots`
+- 목표: 누적 통계와 별개인 한 회차 최고 정답 수를 저장·복원하고,
+  과제 제출에 사용할 기능별 실행 화면을 README에 첨부
+- 수정 파일: `quiz_game.py`, `main.py`, `storage.py`, `state.json`,
+  `tests/test_quiz_game.py`, `tests/test_main.py`, `tests/test_storage.py`,
+  `README.md`, `docs/screenshots/`, `docs/evidence/`
+- 설계 결정: 모든 문제를 끝까지 푼 회차만 최고 기록과 비교하며,
+  첫 완료 회차 또는 더 높은 정답 수일 때 `best_score`와 `best_total`을
+  갱신. 기존 누적 `score` 구조는 유지하고 이전 `state.json`에 새 필드가
+  없으면 0으로 복원해 하위 호환성을 보장
+- 주요 명령: `python3 -B -m unittest discover -s tests -v`,
+  `ruff check --no-cache .`, `python3 -m json.tool state.json`,
+  `git diff --check`, 실제 `python3 main.py` 입력 시나리오
+- 테스트 결과: 기존 58개에 최고 점수 모델·화면·저장 호환 테스트
+  9개를 추가해 전체 67개 통과, Ruff와 JSON 검사 통과
+- 발생한 문제: 자동화 환경의 보안 정책으로 실제 Terminal 창 직접
+  촬영이 차단됨
+- 해결 방법: 현재 브랜치의 실제 프로그램·테스트 출력을 개인정보가
+  드러나지 않는 캡처 페이지로 표시해 기능별 JPEG 8장을 만들고,
+  실제 Terminal·VS Code·GitHub 캡처는 사용자 체크리스트로 분리
+- 커밋: `a3230b4` 세션 최고 점수 저장·복원 구현 및 테스트
+- PR: 기능·문서 커밋 푸시 후 Draft PR 생성 예정
+- 남은 작업: 문서 검증, 두 번째 커밋·푸시, Draft PR과 최신 CI 확인

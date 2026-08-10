@@ -16,12 +16,12 @@ git log --oneline --graph --decorate --all
 - PR #9  https://github.com/juny030507/option-strategy-quiz/pull/9  4cd784a
 - PR #10 https://github.com/juny030507/option-strategy-quiz/pull/10 18457dc
 - PR #11 https://github.com/juny030507/option-strategy-quiz/pull/11 43fe142
+- PR #12 https://github.com/juny030507/option-strategy-quiz/pull/12 ce56118
 
-최종 문서 브랜치:
-- docs/final-readme
-- ec56c8c Docs: 프로젝트 사용법과 구조 문서화
-- Docs: 전체 개발 과정과 최종 제출 자료 완성
-- PR #12 https://github.com/juny030507/option-strategy-quiz/pull/12
+최고 점수·실행 화면 브랜치:
+- agent/best-score-screenshots
+- a3230b4 Feat: 세션 최고 점수 저장 및 복원
+- 기능·문서 커밋 푸시 후 Draft PR 생성 예정
 
 PR #6 이후에는 Draft에서 변경 파일과 검증 결과를 확인한 뒤
 Ready로 전환해 merge commit 방식으로 병합하는 흐름을 사용했다.
