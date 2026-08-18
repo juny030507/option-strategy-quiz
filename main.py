@@ -121,9 +121,21 @@ def show_score(game: QuizGame) -> None:
         print("아직 완료한 퀴즈가 없어 최고 점수가 없습니다.")
     else:
         print(
-            f"최고 점수: {game.best_score}개 정답 "
+            f"완료 회차 최고 점수: {game.best_score}개 정답 "
             f"(총 {game.best_total}문제)"
         )
+
+    print("-" * 40)
+    print("진행 중 회차")
+    if game.has_active_session():
+        print(
+            f"진행 상황: {game.session_answered_count}/"
+            f"{game.session_total}문제 완료"
+        )
+        print(f"현재 회차 점수: {game.session_correct_count}개 정답")
+        print(f"다음 문제: {game.session_answered_count + 1}번")
+    else:
+        print("진행 중인 회차가 없습니다.")
 
     print("-" * 40)
     print("누적 풀이 통계")
@@ -139,12 +151,21 @@ def play_quizzes(game: QuizGame) -> None:
         print("\n등록된 퀴즈가 없습니다.")
         return
 
-    quiz_count = len(game.quizzes)
-    session_score = 0
-    print(f"\n총 {quiz_count}개의 퀴즈를 시작합니다.")
+    if game.has_active_session():
+        print("\n저장된 퀴즈 회차를 이어서 진행합니다.")
+        print(
+            f"현재 {game.session_answered_count}/"
+            f"{game.session_total}문제 완료, "
+            f"{game.session_correct_count}문제 정답"
+        )
+    else:
+        game.start_session()
+        print(f"\n총 {game.session_total}개의 퀴즈를 시작합니다.")
 
-    for quiz_number, quiz in enumerate(game.quizzes, start=1):
-        print(f"\n[{quiz_number}/{quiz_count}]")
+    while game.session_answered_count < game.session_total:
+        quiz_number = game.session_answered_count + 1
+        quiz = game.quizzes[game.session_answered_count]
+        print(f"\n[{quiz_number}/{game.session_total}]")
         quiz.display()
 
         selected_answer = read_number(
@@ -154,15 +175,22 @@ def play_quizzes(game: QuizGame) -> None:
         )
 
         if selected_answer is None:
-            print("퀴즈 풀이를 중단하고 메뉴로 돌아갑니다.")
+            print(
+                "퀴즈 풀이를 중단합니다. "
+                f"{game.session_answered_count}/"
+                f"{game.session_total}문제까지의 상태를 저장합니다."
+            )
             return
 
         if selected_answer == 0:
-            print("메인 메뉴로 돌아갑니다.")
+            print(
+                "메인 메뉴로 돌아갑니다. "
+                f"{game.session_answered_count}/"
+                f"{game.session_total}문제까지의 상태를 저장합니다."
+            )
             return
 
-        if game.submit_answer(quiz, selected_answer):
-            session_score += 1
+        if game.submit_session_answer(quiz, selected_answer):
             print("정답입니다!")
         else:
             correct_choice = quiz.choices[quiz.answer - 1]
@@ -171,10 +199,14 @@ def play_quizzes(game: QuizGame) -> None:
                 f"{correct_choice}입니다."
             )
 
-    print("\n모든 퀴즈를 풀었습니다.")
-    print(f"이번 결과: {quiz_count}문제 중 {session_score}문제 정답")
+    session_score = game.session_correct_count
+    session_total = game.session_total
+    is_new_best = game.finish_session()
 
-    if game.update_best_score(session_score, quiz_count):
+    print("\n모든 퀴즈를 풀었습니다.")
+    print(f"이번 결과: {session_total}문제 중 {session_score}문제 정답")
+
+    if is_new_best:
         print("새로운 최고 점수입니다!")
 
     show_score(game)
@@ -183,6 +215,14 @@ def play_quizzes(game: QuizGame) -> None:
 def main() -> None:
     """사용자가 종료를 선택할 때까지 메뉴를 반복한다."""
     game = load_state()
+
+    if game.has_active_session():
+        print(
+            "저장된 진행 기록이 있습니다: "
+            f"{game.session_answered_count}/"
+            f"{game.session_total}문제 완료, "
+            f"현재 {game.session_correct_count}문제 정답"
+        )
 
     while True:
         show_menu()
