@@ -105,6 +105,64 @@ class TestQuizGame(unittest.TestCase):
         """아직 문제를 풀지 않았다면 정답률은 0이어야 한다."""
         self.assertEqual(self.game.calculate_accuracy(), 0.0)
 
+    def test_start_session_records_question_count(self) -> None:
+        """새 회차는 현재 퀴즈 수와 0문제 진행 상태로 시작해야 한다."""
+        self.game.start_session()
+
+        self.assertTrue(self.game.has_active_session())
+        self.assertEqual(self.game.session_answered_count, 0)
+        self.assertEqual(self.game.session_correct_count, 0)
+        self.assertEqual(self.game.session_total, 1)
+
+    def test_session_answer_updates_progress_and_cumulative_score(self) -> None:
+        """회차 답안은 진행 상태와 누적 통계를 함께 갱신해야 한다."""
+        self.game.start_session()
+
+        result = self.game.submit_session_answer(self.quiz, 1)
+
+        self.assertTrue(result)
+        self.assertEqual(self.game.session_answered_count, 1)
+        self.assertEqual(self.game.session_correct_count, 1)
+        self.assertEqual(self.game.attempt_count, 1)
+        self.assertEqual(self.game.correct_count, 1)
+
+    def test_restore_session_rejects_invalid_progress(self) -> None:
+        """저장된 진행 상태의 타입과 범위가 잘못되면 거부해야 한다."""
+        invalid_values = (
+            (True, 0, 1),
+            (0, 1, 1),
+            (1, 0, 1),
+            (0, 0, 2),
+        )
+
+        for answered_count, correct_count, total_questions in invalid_values:
+            with self.subTest(
+                answered=answered_count,
+                correct=correct_count,
+                total=total_questions,
+            ):
+                with self.assertRaises((TypeError, ValueError)):
+                    self.game.restore_session(
+                        answered_count,
+                        correct_count,
+                        total_questions,
+                    )
+
+    def test_finish_session_updates_best_and_clears_progress(self) -> None:
+        """완료 회차는 최고 기록과 비교한 뒤 진행 상태를 비워야 한다."""
+        self.game.start_session()
+        self.game.submit_session_answer(self.quiz, 1)
+
+        updated = self.game.finish_session()
+
+        self.assertTrue(updated)
+        self.assertEqual(self.game.best_score, 1)
+        self.assertEqual(self.game.best_total, 1)
+        self.assertFalse(self.game.has_active_session())
+        self.assertEqual(self.game.session_answered_count, 0)
+        self.assertEqual(self.game.session_correct_count, 0)
+        self.assertEqual(self.game.session_total, 0)
+
     def test_first_completed_session_sets_best_score(self) -> None:
         """첫 완료 회차는 0점이어도 최고 기록으로 저장해야 한다."""
         updated = self.game.update_best_score(0, 1)

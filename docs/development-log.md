@@ -429,3 +429,33 @@ git diff --check
   [main Actions 실행 31367485364](https://github.com/juny030507/option-strategy-quiz/actions/runs/31367485364) 성공
 - 남은 작업: 사용자의 실제 Terminal·VS Code·GitHub 제출 화면 캡처와
   코드 리뷰 학습
+
+### 단계 기록
+
+- 날짜: 2026-08-18
+- 단계: 추가 개선 - 중단 회차 저장과 다음 문제부터 재개
+- 작업 주체: 사용자 요청에 따른 ChatGPT Codex 보조 작업
+- 브랜치: `agent/resumable-quiz-session`
+- 목표: 최고 점수는 완료한 회차끼리만 비교하고, 중간 종료 시 푼 문제
+  수·현재 정답 수·전체 문제 수를 저장해 재실행 후 다음 문제부터 재개
+- 수정 파일: `quiz_game.py`, `main.py`, `storage.py`,
+  `tests/test_quiz_game.py`, `tests/test_main.py`, `tests/test_storage.py`,
+  `README.md`, `docs/development-log.md`, `docs/evidence/final-tests.txt`
+- 설계 결정: 누적 통계, 진행 중 회차, 완료 회차 최고 기록을 서로 다른
+  상태로 관리. 진행 중 회차는 `active_session`에 저장하고 완료 시에만
+  `best_score`와 비교한 뒤 비움. 새 필드가 없는 이전 JSON은 중단 회차가
+  없는 상태로 불러와 하위 호환성을 유지
+- 주요 명령: `python3 -m unittest discover -s tests -v`,
+  `ruff check --no-cache ...`, `git diff --check`, 기존 사용자
+  `state.json` 읽기 호환 검증
+- 테스트 결과: 기존 67개에 회차 모델 4개, 화면·재개 2개, 저장 왕복
+  1개를 추가해 전체 74개 통과. 기존 실제 기록 10문제, 누적 9/37,
+  최고 3/10도 수정 없이 정상 복원
+- 발생한 문제: 제한된 작업 환경에서 Python 기본 캐시 경로에 쓰지 못해
+  첫 문법 검사가 중단됨
+- 해결 방법: Python 캐시만 임시 경로로 보내 같은 문법·전체 테스트를
+  다시 실행했으며 프로젝트 파일에는 불필요한 캐시를 만들지 않음
+- 커밋: `f229498` 회차 저장·재개 기능, `f1794ed` 회귀 테스트,
+  `bcd5d3e` 저장 후 회차 완료 흐름 보강
+- PR: [#15 Feat: 중단한 퀴즈 회차 저장과 재개](https://github.com/juny030507/option-strategy-quiz/pull/15)
+- 남은 작업: 사용자의 실제 실행 화면 캡처와 코드 리뷰 학습

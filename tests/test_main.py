@@ -103,6 +103,19 @@ class TestMainQuizFlow(unittest.TestCase):
 
         self.assertIn("최고 점수가 없습니다.", output.getvalue())
 
+    def test_show_score_displays_active_session_progress(self) -> None:
+        """중단된 회차의 풀이 수와 현재 점수를 출력해야 한다."""
+        self.game.start_session()
+        output = io.StringIO()
+
+        with redirect_stdout(output):
+            show_score(self.game)
+
+        result = output.getvalue()
+        self.assertIn("진행 상황: 0/1문제 완료", result)
+        self.assertIn("현재 회차 점수: 0개 정답", result)
+        self.assertIn("다음 문제: 1번", result)
+
     def test_completed_quiz_updates_best_score(self) -> None:
         """모든 문제를 풀면 이번 결과를 최고 점수와 비교해야 한다."""
         output = io.StringIO()
@@ -139,7 +152,41 @@ class TestMainQuizFlow(unittest.TestCase):
 
             self.assertEqual(self.game.attempt_count, 0)
             self.assertEqual(self.game.best_total, 0)
+            self.assertTrue(self.game.has_active_session())
+            self.assertEqual(self.game.session_answered_count, 0)
             self.assertIn("퀴즈 풀이를 중단", output.getvalue())
+
+    def test_interrupted_session_resumes_from_next_question(self) -> None:
+        """중단한 회차는 이미 푼 문제를 건너뛰고 이어서 완료해야 한다."""
+        second_quiz = Quiz(
+            "커버드 콜의 구성은?",
+            ["주식 + 콜 매도", "주식 + 풋 매수", "콜 매수", "풋 매도"],
+            1,
+        )
+        game = QuizGame([self.quiz, second_quiz])
+        first_output = io.StringIO()
+
+        with patch("builtins.input", side_effect=["1", "0"]):
+            with redirect_stdout(first_output):
+                play_quizzes(game)
+
+        self.assertEqual(game.session_answered_count, 1)
+        self.assertEqual(game.session_correct_count, 1)
+        self.assertEqual(game.session_total, 2)
+        self.assertEqual(game.best_total, 0)
+
+        resumed_output = io.StringIO()
+        with patch("builtins.input", return_value="1"):
+            with redirect_stdout(resumed_output):
+                play_quizzes(game)
+
+        result = resumed_output.getvalue()
+        self.assertIn("저장된 퀴즈 회차를 이어서 진행합니다.", result)
+        self.assertNotIn("보호적 풋의 구성은?", result)
+        self.assertIn("커버드 콜의 구성은?", result)
+        self.assertEqual(game.best_score, 2)
+        self.assertEqual(game.best_total, 2)
+        self.assertFalse(game.has_active_session())
 
     def test_score_menu_calls_show_score(self) -> None:
         """4번 메뉴를 선택하면 점수 출력 함수를 호출해야 한다."""

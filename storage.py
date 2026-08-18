@@ -27,10 +27,19 @@ def game_to_dict(game: QuizGame) -> dict[str, object]:
         for quiz in game.quizzes
     ]
 
+    active_session = None
+    if game.has_active_session():
+        active_session = {
+            "answered_count": game.session_answered_count,
+            "correct_count": game.session_correct_count,
+            "total_questions": game.session_total,
+        }
+
     return {
         "quizzes": quizzes,
         "best_score": game.best_score,
         "best_total": game.best_total,
+        "active_session": active_session,
         "score": {
             "correct_count": game.correct_count,
             "attempt_count": game.attempt_count,
@@ -132,11 +141,26 @@ def load_state(path: str | Path = STATE_FILE) -> QuizGame:
         if correct_count > attempt_count:
             raise ValueError("정답 수는 풀이 수보다 클 수 없습니다.")
 
+        active_session = data.get("active_session")
+        if active_session is not None and not isinstance(
+            active_session,
+            dict,
+        ):
+            raise ValueError("진행 중 회차 데이터는 사전이어야 합니다.")
+
         game = QuizGame(quizzes)
         game.best_score = best_score
         game.best_total = best_total
         game.correct_count = correct_count
         game.attempt_count = attempt_count
+
+        if active_session is not None:
+            game.restore_session(
+                active_session.get("answered_count"),
+                active_session.get("correct_count"),
+                active_session.get("total_questions"),
+            )
+
         return game
     except FileNotFoundError:
         print("저장 파일이 없어 기본 퀴즈를 사용합니다.")
