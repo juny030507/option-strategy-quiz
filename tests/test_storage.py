@@ -72,6 +72,7 @@ class TestStorage(unittest.TestCase):
         self.assertIn("score", data)
         self.assertEqual(data["best_score"], 2)
         self.assertEqual(data["best_total"], 3)
+        self.assertIsNone(data["active_session"])
         self.assertEqual(data["quizzes"][0]["question"], quiz.question)
         self.assertEqual(data["quizzes"][0]["choices"], quiz.choices)
         self.assertEqual(data["quizzes"][0]["answer"], quiz.answer)
@@ -180,6 +181,34 @@ class TestStorage(unittest.TestCase):
         self.assertEqual(loaded_game.best_score, 3)
         self.assertEqual(loaded_game.best_total, 4)
 
+    def test_active_session_save_and_load_round_trip(self) -> None:
+        """중단된 회차의 풀이 위치와 현재 점수를 동일하게 복원해야 한다."""
+        quizzes = [
+            Quiz(
+                "문제 1",
+                ["선택지1", "선택지2", "선택지3", "선택지4"],
+                1,
+            ),
+            Quiz(
+                "문제 2",
+                ["선택지1", "선택지2", "선택지3", "선택지4"],
+                2,
+            ),
+        ]
+        game = QuizGame(quizzes)
+        game.start_session()
+        game.submit_session_answer(quizzes[0], 1)
+
+        self.assertTrue(save_state(game, self.state_path))
+        loaded_game = load_state(self.state_path)
+
+        self.assertTrue(loaded_game.has_active_session())
+        self.assertEqual(loaded_game.session_answered_count, 1)
+        self.assertEqual(loaded_game.session_correct_count, 1)
+        self.assertEqual(loaded_game.session_total, 2)
+        self.assertEqual(loaded_game.attempt_count, 1)
+        self.assertEqual(loaded_game.correct_count, 1)
+
     def test_corrupted_json_returns_default_game(self) -> None:
         """문법이 깨진 JSON이면 안내 후 기본 게임으로 복구해야 한다."""
         self.state_path.write_text('{"quizzes": [', encoding="utf-8")
@@ -243,6 +272,15 @@ class TestStorage(unittest.TestCase):
                 "best_total": 1,
                 "score": {"correct_count": 0, "attempt_count": 0},
             },
+            "invalid_active_session": {
+                "quizzes": [valid_quiz],
+                "active_session": {
+                    "answered_count": 1,
+                    "correct_count": 1,
+                    "total_questions": 1,
+                },
+                "score": {"correct_count": 1, "attempt_count": 1},
+            },
         }
 
         for case_name, invalid_state in invalid_states.items():
@@ -286,6 +324,7 @@ class TestStorage(unittest.TestCase):
         self.assertEqual(game.best_total, 0)
         self.assertEqual(game.correct_count, 1)
         self.assertEqual(game.attempt_count, 2)
+        self.assertFalse(game.has_active_session())
 
     def test_save_os_error_returns_false(self) -> None:
         """저장 중 OSError가 발생하면 안내 후 False를 반환해야 한다."""
