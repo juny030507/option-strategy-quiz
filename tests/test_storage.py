@@ -209,6 +209,18 @@ class TestStorage(unittest.TestCase):
         self.assertEqual(loaded_game.attempt_count, 1)
         self.assertEqual(loaded_game.correct_count, 1)
 
+        is_correct = loaded_game.submit_session_answer(
+            loaded_game.quizzes[1],
+            2,
+        )
+        is_new_best = loaded_game.finish_session()
+
+        self.assertTrue(is_correct)
+        self.assertTrue(is_new_best)
+        self.assertEqual(loaded_game.best_score, 2)
+        self.assertEqual(loaded_game.best_total, 2)
+        self.assertFalse(loaded_game.has_active_session())
+
     def test_corrupted_json_returns_default_game(self) -> None:
         """문법이 깨진 JSON이면 안내 후 기본 게임으로 복구해야 한다."""
         self.state_path.write_text('{"quizzes": [', encoding="utf-8")
